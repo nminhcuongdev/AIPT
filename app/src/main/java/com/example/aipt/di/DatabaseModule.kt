@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.example.aipt.core.data.local.AiptDatabase
 import com.example.aipt.feature.exercise.data.local.ExerciseDao
+import com.example.aipt.feature.profile.data.local.GymEquipmentDao
+import com.example.aipt.feature.profile.data.local.UserProfileDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,8 +23,14 @@ object DatabaseModule {
             context = context,
             klass = AiptDatabase::class.java,
             name = "aipt.db",
-        ).build()
+        ).fallbackToDestructiveMigration(dropAllTables = true).build()
 
     @Provides
     fun provideExerciseDao(database: AiptDatabase): ExerciseDao = database.exerciseDao()
+
+    @Provides
+    fun provideUserProfileDao(database: AiptDatabase): UserProfileDao = database.userProfileDao()
+
+    @Provides
+    fun provideGymEquipmentDao(database: AiptDatabase): GymEquipmentDao = database.gymEquipmentDao()
 }

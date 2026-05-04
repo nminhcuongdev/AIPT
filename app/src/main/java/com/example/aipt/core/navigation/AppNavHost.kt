@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.aipt.feature.exercise.presentation.detail.ExerciseDetailRoute
 import com.example.aipt.feature.exercise.presentation.list.ExerciseListRoute
+import com.example.aipt.feature.profile.presentation.ProfileSetupRoute
 
 @Composable
 fun AppNavHost() {
@@ -15,10 +16,20 @@ fun AppNavHost() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.ExerciseList.route,
+        startDestination = Screen.ProfileSetup.route,
     ) {
+        composable(Screen.ProfileSetup.route) {
+            ProfileSetupRoute(
+                onContinue = {
+                    navController.navigate(Screen.ExerciseList.route) {
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
         composable(Screen.ExerciseList.route) {
             ExerciseListRoute(
+                onProfileClick = { navController.navigate(Screen.ProfileSetup.route) },
                 onExerciseClick = { exerciseId ->
                     navController.navigate(Screen.ExerciseDetail.createRoute(exerciseId))
                 },

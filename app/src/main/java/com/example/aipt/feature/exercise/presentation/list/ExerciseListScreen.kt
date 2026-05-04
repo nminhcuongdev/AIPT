@@ -38,6 +38,7 @@ import com.example.aipt.feature.exercise.domain.model.Exercise
 
 @Composable
 fun ExerciseListRoute(
+    onProfileClick: () -> Unit,
     onExerciseClick: (Int) -> Unit,
     viewModel: ExerciseListViewModel = hiltViewModel(),
 ) {
@@ -45,6 +46,7 @@ fun ExerciseListRoute(
 
     ExerciseListScreen(
         state = state,
+        onProfileClick = onProfileClick,
         onSearchQueryChanged = viewModel::onSearchQueryChanged,
         onMuscleGroupSelected = viewModel::onMuscleGroupSelected,
         onFavoritesOnlyChanged = viewModel::onFavoritesOnlyChanged,
@@ -56,6 +58,7 @@ fun ExerciseListRoute(
 @Composable
 private fun ExerciseListScreen(
     state: ExerciseListUiState,
+    onProfileClick: () -> Unit,
     onSearchQueryChanged: (String) -> Unit,
     onMuscleGroupSelected: (String) -> Unit,
     onFavoritesOnlyChanged: () -> Unit,
@@ -70,11 +73,20 @@ private fun ExerciseListScreen(
                 .padding(horizontal = 20.dp),
         ) {
             Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = "Thu vien bai tap",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Thu vien bai tap",
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                TextButton(onClick = onProfileClick) {
+                    Text("Profile")
+                }
+            }
             Text(
                 text = "Tim bai tap theo nhom co, dung cu va muc tieu luyen tap.",
                 style = MaterialTheme.typography.bodyMedium,
