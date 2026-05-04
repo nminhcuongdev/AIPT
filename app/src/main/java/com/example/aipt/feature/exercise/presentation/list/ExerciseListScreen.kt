@@ -19,6 +19,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -30,11 +31,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.aipt.core.ui.components.AiptHeroHeader
+import com.example.aipt.core.ui.components.AiptMetricRow
+import com.example.aipt.core.ui.components.AiptPanel
+import com.example.aipt.core.ui.components.AiptScreen
 import com.example.aipt.feature.exercise.domain.model.Exercise
+import com.example.aipt.ui.theme.Bone
+import com.example.aipt.ui.theme.Ember
+import com.example.aipt.ui.theme.Ink900
+import com.example.aipt.ui.theme.Sea
+import com.example.aipt.ui.theme.Volt
 
 @Composable
 fun ExerciseListRoute(
@@ -65,60 +76,53 @@ private fun ExerciseListScreen(
     onFavoriteClicked: (Exercise) -> Unit,
     onExerciseClick: (Int) -> Unit,
 ) {
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 20.dp),
-        ) {
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "Thu vien bai tap",
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
+    Scaffold(containerColor = Color.Transparent) { padding ->
+        AiptScreen(modifier = Modifier.padding(padding), contentPadding = PaddingValues(horizontal = 18.dp, vertical = 16.dp)) {
+            AiptHeroHeader(
+                eyebrow = "AIPT Library",
+                title = "Train with intent",
+                description = "Tim, loc va luu cac bai tap phu hop voi profile va thiet bi cua ban.",
+                trailing = { TextButton(onClick = onProfileClick) { Text("Profile") } },
+            )
+            Spacer(Modifier.height(16.dp))
+            AiptMetricRow(
+                listOf(
+                    state.exercises.size.toString() to "shown",
+                    state.muscleGroups.drop(1).size.toString() to "groups",
+                    state.exercises.count { it.isFavorite }.toString() to "saved",
+                ),
+            )
+            Spacer(Modifier.height(16.dp))
+            AiptPanel {
+                OutlinedTextField(
+                    value = state.searchQuery,
+                    onValueChange = onSearchQueryChanged,
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    label = { Text("Search exercise") },
+                    placeholder = { Text("squat, chest, dumbbell") },
                 )
-                TextButton(onClick = onProfileClick) {
-                    Text("Profile")
+                Spacer(Modifier.height(12.dp))
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    item {
+                        FilterChip(
+                            selected = state.showFavoritesOnly,
+                            onClick = onFavoritesOnlyChanged,
+                            label = { Text("Saved") },
+                            colors = filterColors(),
+                        )
+                    }
+                    items(state.muscleGroups) { muscleGroup ->
+                        FilterChip(
+                            selected = state.selectedMuscleGroup == muscleGroup,
+                            onClick = { onMuscleGroupSelected(muscleGroup) },
+                            label = { Text(if (muscleGroup == "All") "All" else muscleGroup) },
+                            colors = filterColors(),
+                        )
+                    }
                 }
             }
-            Text(
-                text = "Tim bai tap theo nhom co, dung cu va muc tieu luyen tap.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                value = state.searchQuery,
-                onValueChange = onSearchQueryChanged,
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                label = { Text("Tim kiem bai tap") },
-                placeholder = { Text("Vi du: squat, chest, dumbbell") },
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                item {
-                    FilterChip(
-                        selected = state.showFavoritesOnly,
-                        onClick = onFavoritesOnlyChanged,
-                        label = { Text("Yeu thich") },
-                    )
-                }
-                items(state.muscleGroups) { muscleGroup ->
-                    FilterChip(
-                        selected = state.selectedMuscleGroup == muscleGroup,
-                        onClick = { onMuscleGroupSelected(muscleGroup) },
-                        label = { Text(if (muscleGroup == "All") "Tat ca" else muscleGroup) },
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(14.dp))
             if (state.exercises.isEmpty()) {
                 EmptyExerciseState()
             } else {
@@ -140,47 +144,49 @@ private fun ExerciseListScreen(
 }
 
 @Composable
-private fun ExerciseCard(
-    exercise: Exercise,
-    onFavoriteClicked: () -> Unit,
-    onClick: () -> Unit,
-) {
+private fun filterColors() = FilterChipDefaults.filterChipColors(
+    selectedContainerColor = Ink900,
+    selectedLabelColor = Volt,
+)
+
+@Composable
+private fun ExerciseCard(exercise: Exercise, onFavoriteClicked: () -> Unit, onClick: () -> Unit) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(18.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
+                Surface(shape = MaterialTheme.shapes.large, color = Ink900) {
                     Text(
-                        text = exercise.name,
+                        text = exercise.muscleGroup.take(2).uppercase(),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                        color = Volt,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = exercise.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
                     )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                TextButton(onClick = onFavoriteClicked) {
-                    Text(if (exercise.isFavorite) "Da luu" else "Luu")
+                Spacer(Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(exercise.name, style = MaterialTheme.typography.titleLarge, color = Ink900)
+                    Text(exercise.equipment, style = MaterialTheme.typography.bodyMedium, color = Sea, fontWeight = FontWeight.Bold)
                 }
+                TextButton(onClick = onFavoriteClicked) { Text(if (exercise.isFavorite) "Saved" else "Save") }
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = exercise.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AssistChip(onClick = {}, label = { Text(exercise.muscleGroup) })
-                AssistChip(onClick = {}, label = { Text(exercise.equipment) })
                 if (exercise.lastViewedAt != null) {
-                    AssistChip(onClick = {}, label = { Text("Da xem") })
+                    AssistChip(onClick = {}, label = { Text("Viewed") })
                 }
             }
         }
@@ -189,19 +195,12 @@ private fun ExerciseCard(
 
 @Composable
 private fun EmptyExerciseState() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            shape = MaterialTheme.shapes.large,
-        ) {
-            Text(
-                text = "Khong co bai tap phu hop.",
-                modifier = Modifier.padding(24.dp),
-                style = MaterialTheme.typography.bodyLarge,
-            )
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Surface(color = Ink900, shape = MaterialTheme.shapes.extraLarge) {
+            Column(modifier = Modifier.padding(28.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("No matching movement", style = MaterialTheme.typography.titleLarge, color = Bone)
+                Text("Thu doi search hoac bo filter.", style = MaterialTheme.typography.bodyMedium, color = Bone.copy(alpha = 0.72f))
+            }
         }
     }
 }

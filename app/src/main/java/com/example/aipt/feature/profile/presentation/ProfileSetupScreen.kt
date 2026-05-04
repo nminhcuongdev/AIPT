@@ -22,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -47,34 +48,28 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.aipt.core.ui.components.AiptHeroHeader
+import com.example.aipt.core.ui.components.AiptMetricRow
+import com.example.aipt.core.ui.components.AiptPanel
+import com.example.aipt.core.ui.components.AiptPill
+import com.example.aipt.core.ui.components.AiptScreen
 import com.example.aipt.feature.profile.domain.model.GymEquipment
+import com.example.aipt.ui.theme.Bone
+import com.example.aipt.ui.theme.Ember
+import com.example.aipt.ui.theme.Ink900
+import com.example.aipt.ui.theme.Sea
+import com.example.aipt.ui.theme.Volt
 import kotlin.math.roundToInt
 
 @Composable
-fun BasicInfoRoute(
-    onNext: () -> Unit,
-    viewModel: ProfileSetupViewModel = hiltViewModel(),
-) {
+fun BasicInfoRoute(onNext: () -> Unit, viewModel: ProfileSetupViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsState()
-
-    BasicInfoScreen(
-        state = state,
-        onNameChanged = viewModel::onNameChanged,
-        onAgeChanged = viewModel::onAgeChanged,
-        onHeightChanged = viewModel::onHeightChanged,
-        onWeightChanged = viewModel::onWeightChanged,
-        onNext = onNext,
-    )
+    BasicInfoScreen(state, viewModel::onNameChanged, viewModel::onAgeChanged, viewModel::onHeightChanged, viewModel::onWeightChanged, onNext)
 }
 
 @Composable
-fun InBodyRoute(
-    onBack: () -> Unit,
-    onNext: () -> Unit,
-    viewModel: ProfileSetupViewModel = hiltViewModel(),
-) {
+fun InBodyRoute(onBack: () -> Unit, onNext: () -> Unit, viewModel: ProfileSetupViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsState()
-
     InBodyScreen(
         state = state,
         onBodyFatPercentChanged = viewModel::onBodyFatPercentChanged,
@@ -94,37 +89,15 @@ fun InBodyRoute(
 }
 
 @Composable
-fun TrainingGoalRoute(
-    onBack: () -> Unit,
-    onNext: () -> Unit,
-    viewModel: ProfileSetupViewModel = hiltViewModel(),
-) {
+fun TrainingGoalRoute(onBack: () -> Unit, onNext: () -> Unit, viewModel: ProfileSetupViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsState()
-
-    TrainingGoalScreen(
-        selectedGoal = state.selectedGoal,
-        onGoalSelected = viewModel::onGoalSelected,
-        onBack = onBack,
-        onNext = onNext,
-    )
+    TrainingGoalScreen(state.selectedGoal, viewModel::onGoalSelected, onBack, onNext)
 }
 
 @Composable
-fun GymEquipmentRoute(
-    onBack: () -> Unit,
-    onFinish: () -> Unit,
-    viewModel: ProfileSetupViewModel = hiltViewModel(),
-) {
+fun GymEquipmentRoute(onBack: () -> Unit, onFinish: () -> Unit, viewModel: ProfileSetupViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsState()
-
-    GymEquipmentScreen(
-        state = state,
-        onEquipmentSwiped = viewModel::onEquipmentSwiped,
-        onResetEquipment = viewModel::onResetEquipment,
-        onSaveProfile = viewModel::onSaveProfile,
-        onBack = onBack,
-        onFinish = onFinish,
-    )
+    GymEquipmentScreen(state, viewModel::onEquipmentSwiped, viewModel::onResetEquipment, viewModel::onSaveProfile, onBack, onFinish)
 }
 
 @Composable
@@ -136,37 +109,27 @@ private fun BasicInfoScreen(
     onWeightChanged: (String) -> Unit,
     onNext: () -> Unit,
 ) {
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-        ) {
-            StepHeader(
-                step = "Buoc 1/4",
-                title = "Thong tin co ban",
-                description = "AI trainer can cac thong tin nen tang de ca nhan hoa cuong do va muc tieu.",
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            OutlinedTextField(
-                value = state.name,
-                onValueChange = onNameChanged,
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                label = { Text("Ten cua ban") },
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                NumberField(state.age, onAgeChanged, "Tuoi", Modifier.weight(1f))
-                NumberField(state.heightCm, onHeightChanged, "Chieu cao cm", Modifier.weight(1f))
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            NumberField(state.weightKg, onWeightChanged, "Can nang kg", Modifier.fillMaxWidth())
-            Spacer(modifier = Modifier.height(24.dp))
-            Button(onClick = onNext, enabled = state.canSave, modifier = Modifier.fillMaxWidth()) {
-                Text("Tiep tuc")
+    Scaffold(containerColor = Color.Transparent) { padding ->
+        AiptScreen(modifier = Modifier.padding(padding)) {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                AiptHeroHeader(
+                    eyebrow = "Step 01 / Profile",
+                    title = "Build your training baseline",
+                    description = "Nhap cac thong tin nen tang de AI trainer tinh muc do kho, volume va muc tieu phu hop.",
+                )
+                Spacer(Modifier.height(22.dp))
+                AiptPanel {
+                    OutlinedTextField(state.name, onNameChanged, modifier = Modifier.fillMaxWidth(), singleLine = true, label = { Text("Ten cua ban") })
+                    Spacer(Modifier.height(14.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        NumberField(state.age, onAgeChanged, "Tuoi", Modifier.weight(1f))
+                        NumberField(state.heightCm, onHeightChanged, "Chieu cao", Modifier.weight(1f))
+                    }
+                    Spacer(Modifier.height(14.dp))
+                    NumberField(state.weightKg, onWeightChanged, "Can nang kg", Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(22.dp))
+                    Button(onClick = onNext, enabled = state.canSave, modifier = Modifier.fillMaxWidth().height(54.dp)) { Text("Continue") }
+                }
             }
         }
     }
@@ -189,89 +152,76 @@ private fun InBodyScreen(
     onBack: () -> Unit,
     onNext: () -> Unit,
 ) {
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-        ) {
-            StepHeader(
-                step = "Buoc 2/4",
-                title = "Chi so InBody",
-                description = "Nhap body composition neu co ket qua InBody. Co the bo trong chi so chua co.",
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Text("Tong quan co the", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                DecimalField(state.bodyFatPercent, onBodyFatPercentChanged, "Body fat %", Modifier.weight(1f))
-                DecimalField(state.skeletalMuscleMassKg, onSkeletalMuscleMassChanged, "SMM kg", Modifier.weight(1f))
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                DecimalField(state.bodyWaterPercent, onBodyWaterPercentChanged, "Body water %", Modifier.weight(1f))
-                NumberField(state.visceralFatLevel, onVisceralFatLevelChanged, "Visceral fat", Modifier.weight(1f))
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                NumberField(state.basalMetabolicRateKcal, onBasalMetabolicRateChanged, "BMR kcal", Modifier.weight(1f))
-                DecimalField(state.waistHipRatio, onWaistHipRatioChanged, "Waist hip ratio", Modifier.weight(1f))
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("Segmental muscle mass kg", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                DecimalField(state.leftArmMuscleKg, onLeftArmMuscleChanged, "Left arm", Modifier.weight(1f))
-                DecimalField(state.rightArmMuscleKg, onRightArmMuscleChanged, "Right arm", Modifier.weight(1f))
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            DecimalField(state.trunkMuscleKg, onTrunkMuscleChanged, "Trunk", Modifier.fillMaxWidth())
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                DecimalField(state.leftLegMuscleKg, onLeftLegMuscleChanged, "Left leg", Modifier.weight(1f))
-                DecimalField(state.rightLegMuscleKg, onRightLegMuscleChanged, "Right leg", Modifier.weight(1f))
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) { Text("Quay lai") }
-                Button(onClick = onNext, modifier = Modifier.weight(1f)) { Text("Tiep tuc") }
+    Scaffold(containerColor = Color.Transparent) { padding ->
+        AiptScreen(modifier = Modifier.padding(padding)) {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                AiptHeroHeader("Step 02 / InBody", "Decode body composition", "Nhap chi so InBody neu co. Cac truong trong duoc bo qua an toan.")
+                Spacer(Modifier.height(18.dp))
+                AiptPanel {
+                    Text("Composition", style = MaterialTheme.typography.titleLarge, color = Ink900)
+                    Spacer(Modifier.height(14.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        DecimalField(state.bodyFatPercent, onBodyFatPercentChanged, "Body fat %", Modifier.weight(1f))
+                        DecimalField(state.skeletalMuscleMassKg, onSkeletalMuscleMassChanged, "SMM kg", Modifier.weight(1f))
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        DecimalField(state.bodyWaterPercent, onBodyWaterPercentChanged, "Water %", Modifier.weight(1f))
+                        NumberField(state.visceralFatLevel, onVisceralFatLevelChanged, "Visceral", Modifier.weight(1f))
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        NumberField(state.basalMetabolicRateKcal, onBasalMetabolicRateChanged, "BMR", Modifier.weight(1f))
+                        DecimalField(state.waistHipRatio, onWaistHipRatioChanged, "WHR", Modifier.weight(1f))
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+                AiptPanel {
+                    Text("Segmental muscle kg", style = MaterialTheme.typography.titleLarge, color = Ink900)
+                    Spacer(Modifier.height(14.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        DecimalField(state.leftArmMuscleKg, onLeftArmMuscleChanged, "Left arm", Modifier.weight(1f))
+                        DecimalField(state.rightArmMuscleKg, onRightArmMuscleChanged, "Right arm", Modifier.weight(1f))
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    DecimalField(state.trunkMuscleKg, onTrunkMuscleChanged, "Trunk", Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        DecimalField(state.leftLegMuscleKg, onLeftLegMuscleChanged, "Left leg", Modifier.weight(1f))
+                        DecimalField(state.rightLegMuscleKg, onRightLegMuscleChanged, "Right leg", Modifier.weight(1f))
+                    }
+                }
+                Spacer(Modifier.height(18.dp))
+                NavButtons(onBack, onNext)
             }
         }
     }
 }
 
 @Composable
-private fun TrainingGoalScreen(
-    selectedGoal: String,
-    onGoalSelected: (String) -> Unit,
-    onBack: () -> Unit,
-    onNext: () -> Unit,
-) {
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-        ) {
-            StepHeader(
-                step = "Buoc 3/4",
-                title = "Muc tieu tap luyen",
-                description = "Chon muc tieu chinh de goi y bai tap, volume va tien trinh phu hop.",
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TrainingGoals.forEach { goal ->
-                    FilterChip(selected = selectedGoal == goal, onClick = { onGoalSelected(goal) }, label = { Text(goal) })
+private fun TrainingGoalScreen(selectedGoal: String, onGoalSelected: (String) -> Unit, onBack: () -> Unit, onNext: () -> Unit) {
+    Scaffold(containerColor = Color.Transparent) { padding ->
+        AiptScreen(modifier = Modifier.padding(padding)) {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                AiptHeroHeader("Step 03 / Goal", "Choose the north star", "Muc tieu nay se dinh huong cach AI lap lich tap va uu tien bai tap.")
+                Spacer(Modifier.height(22.dp))
+                AiptPanel {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        TrainingGoals.forEach { goal ->
+                            FilterChip(
+                                selected = selectedGoal == goal,
+                                onClick = { onGoalSelected(goal) },
+                                label = { Text(goal) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = Ink900,
+                                    selectedLabelColor = Volt,
+                                ),
+                            )
+                        }
+                    }
                 }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) { Text("Quay lai") }
-                Button(onClick = onNext, modifier = Modifier.weight(1f)) { Text("Tiep tuc") }
+                Spacer(Modifier.height(18.dp))
+                NavButtons(onBack, onNext)
             }
         }
     }
@@ -286,107 +236,65 @@ private fun GymEquipmentScreen(
     onBack: () -> Unit,
     onFinish: () -> Unit,
 ) {
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-        ) {
-            StepHeader(
-                step = "Buoc 4/4",
-                title = "Thiet bi phong gym",
-                description = "Vuot phai neu co san, vuot trai neu khong co. Du lieu nay giup AI tranh goi y bai tap khong thuc hien duoc.",
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            EquipmentSwipeSection(state, onEquipmentSwiped, onResetEquipment)
-            Spacer(modifier = Modifier.height(24.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) { Text("Quay lai") }
-                Button(
-                    onClick = {
-                        onSaveProfile()
-                        onFinish()
-                    },
-                    enabled = state.canSave,
-                    modifier = Modifier.weight(1f),
-                ) { Text("Hoan tat") }
+    Scaffold(containerColor = Color.Transparent) { padding ->
+        AiptScreen(modifier = Modifier.padding(padding)) {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                AiptHeroHeader(
+                    eyebrow = "Step 04 / Equipment",
+                    title = "Swipe your gym inventory",
+                    description = "Phai la available, trai la unavailable. AI se tranh nhung bai tap can dung cu khong co.",
+                    trailing = { TextButton(onClick = onResetEquipment) { Text("Reset") } },
+                )
+                Spacer(Modifier.height(16.dp))
+                AiptMetricRow(listOf(state.availableCount.toString() to "available", state.unavailableCount.toString() to "blocked", state.remainingCount.toString() to "left"))
+                Spacer(Modifier.height(18.dp))
+                EquipmentSwipeSection(state, onEquipmentSwiped)
+                Spacer(Modifier.height(18.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f).height(54.dp)) { Text("Back") }
+                    Button(
+                        onClick = {
+                            onSaveProfile()
+                            onFinish()
+                        },
+                        enabled = state.canSave,
+                        modifier = Modifier.weight(1f).height(54.dp),
+                    ) { Text("Finish") }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun StepHeader(step: String, title: String, description: String) {
-    Text(text = step, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
-    Spacer(modifier = Modifier.height(8.dp))
-    Text(text = title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-    Spacer(modifier = Modifier.height(8.dp))
-    Text(text = description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun NavButtons(onBack: () -> Unit, onNext: () -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f).height(54.dp)) { Text("Back") }
+        Button(onClick = onNext, modifier = Modifier.weight(1f).height(54.dp)) { Text("Continue") }
+    }
 }
 
 @Composable
 private fun NumberField(value: String, onValueChange: (String) -> Unit, label: String, modifier: Modifier = Modifier) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        label = { Text(label) },
-    )
+    OutlinedTextField(value = value, onValueChange = onValueChange, modifier = modifier, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), label = { Text(label) })
 }
 
 @Composable
 private fun DecimalField(value: String, onValueChange: (String) -> Unit, label: String, modifier: Modifier = Modifier) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-        label = { Text(label) },
-    )
+    OutlinedTextField(value = value, onValueChange = onValueChange, modifier = modifier, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), label = { Text(label) })
 }
 
 @Composable
-private fun EquipmentSwipeSection(
-    state: ProfileSetupUiState,
-    onEquipmentSwiped: (GymEquipment, Boolean) -> Unit,
-    onResetEquipment: () -> Unit,
-) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text("Swipe thiet bi", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-            Text("Available: vuot phai. Unavailable: vuot trai.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        TextButton(onClick = onResetEquipment) { Text("Lam lai") }
-    }
-    Spacer(modifier = Modifier.height(12.dp))
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        SummaryPill("Co san: ${state.availableCount}")
-        SummaryPill("Khong co: ${state.unavailableCount}")
-        SummaryPill("Con lai: ${state.remainingCount}")
-    }
-    Spacer(modifier = Modifier.height(16.dp))
+private fun EquipmentSwipeSection(state: ProfileSetupUiState, onEquipmentSwiped: (GymEquipment, Boolean) -> Unit) {
     val currentEquipment = state.currentEquipment
     if (currentEquipment == null) {
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-            Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Da phan loai xong thiet bi.", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Text("Bam Hoan tat de luu profile va vao thu vien bai tap.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+        AiptPanel {
+            Text("Inventory complete", style = MaterialTheme.typography.titleLarge, color = Ink900)
+            Spacer(Modifier.height(6.dp))
+            Text("Bam Finish de luu profile va vao thu vien bai tap.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     } else {
         SwipeEquipmentCard(equipment = currentEquipment, onSwipe = { available -> onEquipmentSwiped(currentEquipment, available) })
-    }
-}
-
-@Composable
-private fun SummaryPill(text: String) {
-    Surface(shape = RoundedCornerShape(100.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-        Text(text = text, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.labelMedium)
     }
 }
 
@@ -399,7 +307,7 @@ private fun SwipeEquipmentCard(equipment: GymEquipment, onSwipe: (Boolean) -> Un
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(390.dp)
+                .height(430.dp)
                 .offset { IntOffset(offsetX.roundToInt(), 0) }
                 .pointerInput(equipment.id) {
                     detectDragGestures(
@@ -416,30 +324,24 @@ private fun SwipeEquipmentCard(equipment: GymEquipment, onSwipe: (Boolean) -> Un
                         },
                     )
                 },
-            shape = RoundedCornerShape(28.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            shape = RoundedCornerShape(34.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 14.dp),
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 AsyncImage(model = equipment.imageUrl, contentDescription = equipment.name, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Brush.verticalGradient(colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.78f)))),
-                )
+                Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Ink900.copy(alpha = 0.9f)))))
                 Column(modifier = Modifier.align(Alignment.BottomStart).padding(24.dp)) {
-                    Text(equipment.name, color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                    Text(
-                        text = if (offsetX >= 0f) "Keo sang phai neu co san" else "Keo sang trai neu khong co",
-                        color = Color.White.copy(alpha = 0.86f),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                    AiptPill(text = if (offsetX >= 0f) "AVAILABLE ->" else "<- UNAVAILABLE", containerColor = if (offsetX >= 0f) Volt else Ember, contentColor = Ink900)
+                    Spacer(Modifier.height(14.dp))
+                    Text(equipment.name, color = Bone, style = MaterialTheme.typography.headlineMedium)
+                    Text("Swipe left or right", color = Bone.copy(alpha = 0.82f), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            OutlinedButton(onClick = { onSwipe(false) }, modifier = Modifier.size(width = 150.dp, height = 48.dp)) { Text("Unavailable") }
-            Button(onClick = { onSwipe(true) }, modifier = Modifier.size(width = 150.dp, height = 48.dp)) { Text("Available") }
+        Spacer(Modifier.height(16.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            OutlinedButton(onClick = { onSwipe(false) }, modifier = Modifier.weight(1f).height(52.dp)) { Text("Unavailable") }
+            Button(onClick = { onSwipe(true) }, modifier = Modifier.weight(1f).height(52.dp)) { Text("Available") }
         }
     }
 }
