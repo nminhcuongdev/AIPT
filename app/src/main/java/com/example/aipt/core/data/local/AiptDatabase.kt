@@ -15,7 +15,7 @@ import com.example.aipt.feature.profile.data.local.UserProfileEntity
         UserProfileEntity::class,
         GymEquipmentEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 abstract class AiptDatabase : RoomDatabase() {

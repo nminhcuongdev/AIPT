@@ -20,6 +20,17 @@ data class ProfileSetupUiState(
     val age: String = "",
     val heightCm: String = "",
     val weightKg: String = "",
+    val bodyFatPercent: String = "",
+    val skeletalMuscleMassKg: String = "",
+    val bodyWaterPercent: String = "",
+    val visceralFatLevel: String = "",
+    val basalMetabolicRateKcal: String = "",
+    val waistHipRatio: String = "",
+    val leftArmMuscleKg: String = "",
+    val rightArmMuscleKg: String = "",
+    val trunkMuscleKg: String = "",
+    val leftLegMuscleKg: String = "",
+    val rightLegMuscleKg: String = "",
     val selectedGoal: String = TrainingGoals.first(),
     val equipment: List<GymEquipment> = emptyList(),
     val saved: Boolean = false,
@@ -47,6 +58,17 @@ class ProfileSetupViewModel @Inject constructor(
     private val age = MutableStateFlow("")
     private val heightCm = MutableStateFlow("")
     private val weightKg = MutableStateFlow("")
+    private val bodyFatPercent = MutableStateFlow("")
+    private val skeletalMuscleMassKg = MutableStateFlow("")
+    private val bodyWaterPercent = MutableStateFlow("")
+    private val visceralFatLevel = MutableStateFlow("")
+    private val basalMetabolicRateKcal = MutableStateFlow("")
+    private val waistHipRatio = MutableStateFlow("")
+    private val leftArmMuscleKg = MutableStateFlow("")
+    private val rightArmMuscleKg = MutableStateFlow("")
+    private val trunkMuscleKg = MutableStateFlow("")
+    private val leftLegMuscleKg = MutableStateFlow("")
+    private val rightLegMuscleKg = MutableStateFlow("")
     private val selectedGoal = MutableStateFlow(TrainingGoals.first())
     private val saved = MutableStateFlow(false)
 
@@ -55,6 +77,17 @@ class ProfileSetupViewModel @Inject constructor(
         age,
         heightCm,
         weightKg,
+        bodyFatPercent,
+        skeletalMuscleMassKg,
+        bodyWaterPercent,
+        visceralFatLevel,
+        basalMetabolicRateKcal,
+        waistHipRatio,
+        leftArmMuscleKg,
+        rightArmMuscleKg,
+        trunkMuscleKg,
+        leftLegMuscleKg,
+        rightLegMuscleKg,
         selectedGoal,
         repository.observeEquipment(),
         saved,
@@ -65,9 +98,20 @@ class ProfileSetupViewModel @Inject constructor(
             age = values[1] as String,
             heightCm = values[2] as String,
             weightKg = values[3] as String,
-            selectedGoal = values[4] as String,
-            equipment = values[5] as List<GymEquipment>,
-            saved = values[6] as Boolean,
+            bodyFatPercent = values[4] as String,
+            skeletalMuscleMassKg = values[5] as String,
+            bodyWaterPercent = values[6] as String,
+            visceralFatLevel = values[7] as String,
+            basalMetabolicRateKcal = values[8] as String,
+            waistHipRatio = values[9] as String,
+            leftArmMuscleKg = values[10] as String,
+            rightArmMuscleKg = values[11] as String,
+            trunkMuscleKg = values[12] as String,
+            leftLegMuscleKg = values[13] as String,
+            rightLegMuscleKg = values[14] as String,
+            selectedGoal = values[15] as String,
+            equipment = values[16] as List<GymEquipment>,
+            saved = values[17] as Boolean,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -87,19 +131,31 @@ class ProfileSetupViewModel @Inject constructor(
     }
 
     fun onAgeChanged(value: String) {
-        age.value = value.filter { it.isDigit() }.take(3)
+        age.value = value.onlyDigits().take(3)
         saved.value = false
     }
 
     fun onHeightChanged(value: String) {
-        heightCm.value = value.filter { it.isDigit() }.take(3)
+        heightCm.value = value.onlyDigits().take(3)
         saved.value = false
     }
 
     fun onWeightChanged(value: String) {
-        weightKg.value = value.filter { it.isDigit() }.take(3)
+        weightKg.value = value.onlyDigits().take(3)
         saved.value = false
     }
+
+    fun onBodyFatPercentChanged(value: String) = updateDecimal(bodyFatPercent, value, maxLength = 5)
+    fun onSkeletalMuscleMassChanged(value: String) = updateDecimal(skeletalMuscleMassKg, value, maxLength = 5)
+    fun onBodyWaterPercentChanged(value: String) = updateDecimal(bodyWaterPercent, value, maxLength = 5)
+    fun onVisceralFatLevelChanged(value: String) = updateInteger(visceralFatLevel, value, maxLength = 2)
+    fun onBasalMetabolicRateChanged(value: String) = updateInteger(basalMetabolicRateKcal, value, maxLength = 4)
+    fun onWaistHipRatioChanged(value: String) = updateDecimal(waistHipRatio, value, maxLength = 4)
+    fun onLeftArmMuscleChanged(value: String) = updateDecimal(leftArmMuscleKg, value, maxLength = 4)
+    fun onRightArmMuscleChanged(value: String) = updateDecimal(rightArmMuscleKg, value, maxLength = 4)
+    fun onTrunkMuscleChanged(value: String) = updateDecimal(trunkMuscleKg, value, maxLength = 5)
+    fun onLeftLegMuscleChanged(value: String) = updateDecimal(leftLegMuscleKg, value, maxLength = 5)
+    fun onRightLegMuscleChanged(value: String) = updateDecimal(rightLegMuscleKg, value, maxLength = 5)
 
     fun onGoalSelected(goal: String) {
         selectedGoal.value = goal
@@ -129,6 +185,17 @@ class ProfileSetupViewModel @Inject constructor(
             age = age.value.toIntOrNull(),
             heightCm = heightCm.value.toIntOrNull(),
             weightKg = weightKg.value.toIntOrNull(),
+            bodyFatPercent = bodyFatPercent.value.toDoubleOrNull(),
+            skeletalMuscleMassKg = skeletalMuscleMassKg.value.toDoubleOrNull(),
+            bodyWaterPercent = bodyWaterPercent.value.toDoubleOrNull(),
+            visceralFatLevel = visceralFatLevel.value.toIntOrNull(),
+            basalMetabolicRateKcal = basalMetabolicRateKcal.value.toIntOrNull(),
+            waistHipRatio = waistHipRatio.value.toDoubleOrNull(),
+            leftArmMuscleKg = leftArmMuscleKg.value.toDoubleOrNull(),
+            rightArmMuscleKg = rightArmMuscleKg.value.toDoubleOrNull(),
+            trunkMuscleKg = trunkMuscleKg.value.toDoubleOrNull(),
+            leftLegMuscleKg = leftLegMuscleKg.value.toDoubleOrNull(),
+            rightLegMuscleKg = rightLegMuscleKg.value.toDoubleOrNull(),
             trainingGoal = selectedGoal.value,
         )
         if (profile.name.isBlank()) return
@@ -136,6 +203,32 @@ class ProfileSetupViewModel @Inject constructor(
         viewModelScope.launch {
             repository.saveProfile(profile)
             saved.value = true
+        }
+    }
+
+    private fun updateDecimal(target: MutableStateFlow<String>, value: String, maxLength: Int) {
+        target.value = value.onlyDecimal().take(maxLength)
+        saved.value = false
+    }
+
+    private fun updateInteger(target: MutableStateFlow<String>, value: String, maxLength: Int) {
+        target.value = value.onlyDigits().take(maxLength)
+        saved.value = false
+    }
+
+    private fun String.onlyDigits(): String = filter { it.isDigit() }
+
+    private fun String.onlyDecimal(): String {
+        var dotUsed = false
+        return filter { char ->
+            when {
+                char.isDigit() -> true
+                char == '.' && !dotUsed -> {
+                    dotUsed = true
+                    true
+                }
+                else -> false
+            }
         }
     }
 }

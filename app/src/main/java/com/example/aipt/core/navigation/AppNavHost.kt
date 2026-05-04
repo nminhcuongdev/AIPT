@@ -1,14 +1,20 @@
 package com.example.aipt.core.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.aipt.feature.exercise.presentation.detail.ExerciseDetailRoute
 import com.example.aipt.feature.exercise.presentation.list.ExerciseListRoute
-import com.example.aipt.feature.profile.presentation.ProfileSetupRoute
+import com.example.aipt.feature.profile.presentation.BasicInfoRoute
+import com.example.aipt.feature.profile.presentation.GymEquipmentRoute
+import com.example.aipt.feature.profile.presentation.InBodyRoute
+import com.example.aipt.feature.profile.presentation.ProfileSetupViewModel
+import com.example.aipt.feature.profile.presentation.TrainingGoalRoute
 
 @Composable
 fun AppNavHost() {
@@ -16,20 +22,56 @@ fun AppNavHost() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.ProfileSetup.route,
+        startDestination = Screen.ProfileFlow.route,
     ) {
-        composable(Screen.ProfileSetup.route) {
-            ProfileSetupRoute(
-                onContinue = {
-                    navController.navigate(Screen.ExerciseList.route) {
-                        launchSingleTop = true
-                    }
-                },
-            )
+        navigation(
+            startDestination = Screen.BasicInfo.route,
+            route = Screen.ProfileFlow.route,
+        ) {
+            composable(Screen.BasicInfo.route) { entry ->
+                val parentEntry = navController.getBackStackEntry(Screen.ProfileFlow.route)
+                val viewModel = hiltViewModel<ProfileSetupViewModel>(parentEntry)
+                BasicInfoRoute(
+                    viewModel = viewModel,
+                    onNext = { navController.navigate(Screen.InBody.route) },
+                )
+            }
+            composable(Screen.InBody.route) { entry ->
+                val parentEntry = navController.getBackStackEntry(Screen.ProfileFlow.route)
+                val viewModel = hiltViewModel<ProfileSetupViewModel>(parentEntry)
+                InBodyRoute(
+                    viewModel = viewModel,
+                    onBack = navController::popBackStack,
+                    onNext = { navController.navigate(Screen.TrainingGoal.route) },
+                )
+            }
+            composable(Screen.TrainingGoal.route) { entry ->
+                val parentEntry = navController.getBackStackEntry(Screen.ProfileFlow.route)
+                val viewModel = hiltViewModel<ProfileSetupViewModel>(parentEntry)
+                TrainingGoalRoute(
+                    viewModel = viewModel,
+                    onBack = navController::popBackStack,
+                    onNext = { navController.navigate(Screen.GymEquipment.route) },
+                )
+            }
+            composable(Screen.GymEquipment.route) { entry ->
+                val parentEntry = navController.getBackStackEntry(Screen.ProfileFlow.route)
+                val viewModel = hiltViewModel<ProfileSetupViewModel>(parentEntry)
+                GymEquipmentRoute(
+                    viewModel = viewModel,
+                    onBack = navController::popBackStack,
+                    onFinish = {
+                        navController.navigate(Screen.ExerciseList.route) {
+                            popUpTo(Screen.ProfileFlow.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
+                )
+            }
         }
         composable(Screen.ExerciseList.route) {
             ExerciseListRoute(
-                onProfileClick = { navController.navigate(Screen.ProfileSetup.route) },
+                onProfileClick = { navController.navigate(Screen.ProfileFlow.route) },
                 onExerciseClick = { exerciseId ->
                     navController.navigate(Screen.ExerciseDetail.createRoute(exerciseId))
                 },
