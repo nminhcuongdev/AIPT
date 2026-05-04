@@ -50,6 +50,7 @@ import com.example.aipt.ui.theme.Volt
 @Composable
 fun ExerciseListRoute(
     onProfileClick: () -> Unit,
+    onWorkoutPlanClick: () -> Unit,
     onExerciseClick: (Int) -> Unit,
     viewModel: ExerciseListViewModel = hiltViewModel(),
 ) {
@@ -58,6 +59,7 @@ fun ExerciseListRoute(
     ExerciseListScreen(
         state = state,
         onProfileClick = onProfileClick,
+        onWorkoutPlanClick = onWorkoutPlanClick,
         onSearchQueryChanged = viewModel::onSearchQueryChanged,
         onMuscleGroupSelected = viewModel::onMuscleGroupSelected,
         onFavoritesOnlyChanged = viewModel::onFavoritesOnlyChanged,
@@ -70,6 +72,7 @@ fun ExerciseListRoute(
 private fun ExerciseListScreen(
     state: ExerciseListUiState,
     onProfileClick: () -> Unit,
+    onWorkoutPlanClick: () -> Unit,
     onSearchQueryChanged: (String) -> Unit,
     onMuscleGroupSelected: (String) -> Unit,
     onFavoritesOnlyChanged: () -> Unit,
@@ -81,8 +84,13 @@ private fun ExerciseListScreen(
             AiptHeroHeader(
                 eyebrow = "AIPT Library",
                 title = "Train with intent",
-                description = "Tim, loc va luu cac bai tap phu hop voi profile va thiet bi cua ban.",
-                trailing = { TextButton(onClick = onProfileClick) { Text("Profile") } },
+                description = "Search, filter, and save movements that match your profile and available equipment.",
+                trailing = {
+                    Column(horizontalAlignment = Alignment.End) {
+                        TextButton(onClick = onProfileClick) { Text("Profile") }
+                        TextButton(onClick = onWorkoutPlanClick) { Text("Plan") }
+                    }
+                },
             )
             Spacer(Modifier.height(16.dp))
             AiptMetricRow(

@@ -94,6 +94,21 @@ fun TrainingGoalRoute(onBack: () -> Unit, onNext: () -> Unit, viewModel: Profile
     TrainingGoalScreen(state.selectedGoal, viewModel::onGoalSelected, onBack, onNext)
 }
 
+
+@Composable
+fun PreferencesRoute(onBack: () -> Unit, onNext: () -> Unit, viewModel: ProfileSetupViewModel = hiltViewModel()) {
+    val state by viewModel.uiState.collectAsState()
+    PreferencesScreen(
+        state = state,
+        onDaysPerWeekChanged = viewModel::onDaysPerWeekChanged,
+        onSessionDurationChanged = viewModel::onSessionDurationChanged,
+        onExperienceLevelSelected = viewModel::onExperienceLevelSelected,
+        onInjuriesChanged = viewModel::onInjuriesChanged,
+        onPreferredLanguageSelected = viewModel::onPreferredLanguageSelected,
+        onBack = onBack,
+        onNext = onNext,
+    )
+}
 @Composable
 fun GymEquipmentRoute(onBack: () -> Unit, onFinish: () -> Unit, viewModel: ProfileSetupViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsState()
@@ -115,18 +130,18 @@ private fun BasicInfoScreen(
                 AiptHeroHeader(
                     eyebrow = "Step 01 / Profile",
                     title = "Build your training baseline",
-                    description = "Nhap cac thong tin nen tang de AI trainer tinh muc do kho, volume va muc tieu phu hop.",
+                    description = "Enter your baseline so the AI trainer can tune intensity, volume, and progression.",
                 )
                 Spacer(Modifier.height(22.dp))
                 AiptPanel {
-                    OutlinedTextField(state.name, onNameChanged, modifier = Modifier.fillMaxWidth(), singleLine = true, label = { Text("Ten cua ban") })
+                    OutlinedTextField(state.name, onNameChanged, modifier = Modifier.fillMaxWidth(), singleLine = true, label = { Text("Your name") })
                     Spacer(Modifier.height(14.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        NumberField(state.age, onAgeChanged, "Tuoi", Modifier.weight(1f))
-                        NumberField(state.heightCm, onHeightChanged, "Chieu cao", Modifier.weight(1f))
+                        NumberField(state.age, onAgeChanged, "Age", Modifier.weight(1f))
+                        NumberField(state.heightCm, onHeightChanged, "Height", Modifier.weight(1f))
                     }
                     Spacer(Modifier.height(14.dp))
-                    NumberField(state.weightKg, onWeightChanged, "Can nang kg", Modifier.fillMaxWidth())
+                    NumberField(state.weightKg, onWeightChanged, "Weight kg", Modifier.fillMaxWidth())
                     Spacer(Modifier.height(22.dp))
                     Button(onClick = onNext, enabled = state.canSave, modifier = Modifier.fillMaxWidth().height(54.dp)) { Text("Continue") }
                 }
@@ -155,7 +170,7 @@ private fun InBodyScreen(
     Scaffold(containerColor = Color.Transparent) { padding ->
         AiptScreen(modifier = Modifier.padding(padding)) {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                AiptHeroHeader("Step 02 / InBody", "Decode body composition", "Nhap chi so InBody neu co. Cac truong trong duoc bo qua an toan.")
+                AiptHeroHeader("Step 02 / InBody", "Decode body composition", "Enter InBody metrics if available. Any unknown field can be left blank.")
                 Spacer(Modifier.height(18.dp))
                 AiptPanel {
                     Text("Composition", style = MaterialTheme.typography.titleLarge, color = Ink900)
@@ -203,15 +218,15 @@ private fun TrainingGoalScreen(selectedGoal: String, onGoalSelected: (String) ->
     Scaffold(containerColor = Color.Transparent) { padding ->
         AiptScreen(modifier = Modifier.padding(padding)) {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                AiptHeroHeader("Step 03 / Goal", "Choose the north star", "Muc tieu nay se dinh huong cach AI lap lich tap va uu tien bai tap.")
+                AiptHeroHeader("Step 03 / Goal", "Choose the north star", "This goal guides how the AI plans workouts and prioritizes exercises.")
                 Spacer(Modifier.height(22.dp))
                 AiptPanel {
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         TrainingGoals.forEach { goal ->
                             FilterChip(
-                                selected = selectedGoal == goal,
-                                onClick = { onGoalSelected(goal) },
-                                label = { Text(goal) },
+                                selected = selectedGoal == goal.label,
+                                onClick = { onGoalSelected(goal.label) },
+                                label = { Text(goal.label) },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = Ink900,
                                     selectedLabelColor = Volt,
@@ -227,6 +242,73 @@ private fun TrainingGoalScreen(selectedGoal: String, onGoalSelected: (String) ->
     }
 }
 
+
+@Composable
+private fun PreferencesScreen(
+    state: ProfileSetupUiState,
+    onDaysPerWeekChanged: (String) -> Unit,
+    onSessionDurationChanged: (String) -> Unit,
+    onExperienceLevelSelected: (String) -> Unit,
+    onInjuriesChanged: (String) -> Unit,
+    onPreferredLanguageSelected: (String) -> Unit,
+    onBack: () -> Unit,
+    onNext: () -> Unit,
+) {
+    Scaffold(containerColor = Color.Transparent) { padding ->
+        AiptScreen(modifier = Modifier.padding(padding)) {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                AiptHeroHeader(
+                    eyebrow = "Step 04 / Preferences",
+                    title = "Set training constraints",
+                    description = "Complete the workout-plan request with schedule, experience, limitations, and response language.",
+                )
+                Spacer(Modifier.height(22.dp))
+                AiptPanel {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        NumberField(state.daysPerWeek, onDaysPerWeekChanged, "Days / week", Modifier.weight(1f))
+                        NumberField(state.sessionDurationMinutes, onSessionDurationChanged, "Minutes", Modifier.weight(1f))
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    Text("Experience level", style = MaterialTheme.typography.titleMedium, color = Ink900)
+                    Spacer(Modifier.height(10.dp))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        ExperienceLevels.forEach { level ->
+                            FilterChip(
+                                selected = state.experienceLevel == level,
+                                onClick = { onExperienceLevelSelected(level) },
+                                label = { Text(level.replaceFirstChar { it.uppercase() }) },
+                                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Ink900, selectedLabelColor = Volt),
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = state.injuriesOrLimitations,
+                        onValueChange = onInjuriesChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3,
+                        label = { Text("Injuries or limitations") },
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Text("Preferred response language", style = MaterialTheme.typography.titleMedium, color = Ink900)
+                    Spacer(Modifier.height(10.dp))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        PreferredLanguages.forEach { language ->
+                            FilterChip(
+                                selected = state.preferredLanguage == language.code,
+                                onClick = { onPreferredLanguageSelected(language.code) },
+                                label = { Text(language.label) },
+                                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Ink900, selectedLabelColor = Volt),
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(18.dp))
+                NavButtons(onBack, onNext)
+            }
+        }
+    }
+}
 @Composable
 private fun GymEquipmentScreen(
     state: ProfileSetupUiState,
@@ -240,9 +322,9 @@ private fun GymEquipmentScreen(
         AiptScreen(modifier = Modifier.padding(padding)) {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 AiptHeroHeader(
-                    eyebrow = "Step 04 / Equipment",
+                    eyebrow = "Step 05 / Equipment",
                     title = "Swipe your gym inventory",
-                    description = "Phai la available, trai la unavailable. AI se tranh nhung bai tap can dung cu khong co.",
+                    description = "Swipe right for available, left for unavailable. The AI will avoid exercises that require missing equipment.",
                     trailing = { TextButton(onClick = onResetEquipment) { Text("Reset") } },
                 )
                 Spacer(Modifier.height(16.dp))
@@ -291,7 +373,7 @@ private fun EquipmentSwipeSection(state: ProfileSetupUiState, onEquipmentSwiped:
         AiptPanel {
             Text("Inventory complete", style = MaterialTheme.typography.titleLarge, color = Ink900)
             Spacer(Modifier.height(6.dp))
-            Text("Bam Finish de luu profile va vao thu vien bai tap.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("Tap Finish to save your profile and enter the exercise library.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     } else {
         SwipeEquipmentCard(equipment = currentEquipment, onSwipe = { available -> onEquipmentSwiped(currentEquipment, available) })

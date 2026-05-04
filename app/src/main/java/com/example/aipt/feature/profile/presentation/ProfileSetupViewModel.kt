@@ -31,7 +31,12 @@ data class ProfileSetupUiState(
     val trunkMuscleKg: String = "",
     val leftLegMuscleKg: String = "",
     val rightLegMuscleKg: String = "",
-    val selectedGoal: String = TrainingGoals.first(),
+    val selectedGoal: String = TrainingGoals.first().label,
+    val daysPerWeek: String = "5",
+    val sessionDurationMinutes: String = "60",
+    val experienceLevel: String = ExperienceLevels[1],
+    val injuriesOrLimitations: String = "None",
+    val preferredLanguage: String = PreferredLanguages.first().code,
     val equipment: List<GymEquipment> = emptyList(),
     val saved: Boolean = false,
 ) {
@@ -42,12 +47,21 @@ data class ProfileSetupUiState(
     val canSave: Boolean = name.isNotBlank()
 }
 
+data class TrainingGoalOption(val label: String, val apiValue: String)
+data class LanguageOption(val label: String, val code: String)
+
 val TrainingGoals = listOf(
-    "Tang co",
-    "Giam mo",
-    "Tang suc manh",
-    "Cai thien suc ben",
-    "Duy tri suc khoe",
+    TrainingGoalOption("Build muscle", "build_muscle"),
+    TrainingGoalOption("Lose fat", "lose_fat"),
+    TrainingGoalOption("Gain strength", "gain_strength"),
+    TrainingGoalOption("Improve endurance", "improve_endurance"),
+    TrainingGoalOption("Maintain fitness", "maintain_fitness"),
+)
+
+val ExperienceLevels = listOf("beginner", "intermediate", "advanced")
+val PreferredLanguages = listOf(
+    LanguageOption("English", "en"),
+    LanguageOption("Vietnamese", "vi"),
 )
 
 @HiltViewModel
@@ -69,7 +83,12 @@ class ProfileSetupViewModel @Inject constructor(
     private val trunkMuscleKg = MutableStateFlow("")
     private val leftLegMuscleKg = MutableStateFlow("")
     private val rightLegMuscleKg = MutableStateFlow("")
-    private val selectedGoal = MutableStateFlow(TrainingGoals.first())
+    private val selectedGoal = MutableStateFlow(TrainingGoals.first().label)
+    private val daysPerWeek = MutableStateFlow("5")
+    private val sessionDurationMinutes = MutableStateFlow("60")
+    private val experienceLevel = MutableStateFlow(ExperienceLevels[1])
+    private val injuriesOrLimitations = MutableStateFlow("None")
+    private val preferredLanguage = MutableStateFlow(PreferredLanguages.first().code)
     private val saved = MutableStateFlow(false)
 
     val uiState: StateFlow<ProfileSetupUiState> = combine(
@@ -89,6 +108,11 @@ class ProfileSetupViewModel @Inject constructor(
         leftLegMuscleKg,
         rightLegMuscleKg,
         selectedGoal,
+        daysPerWeek,
+        sessionDurationMinutes,
+        experienceLevel,
+        injuriesOrLimitations,
+        preferredLanguage,
         repository.observeEquipment(),
         saved,
     ) { values ->
@@ -110,8 +134,13 @@ class ProfileSetupViewModel @Inject constructor(
             leftLegMuscleKg = values[13] as String,
             rightLegMuscleKg = values[14] as String,
             selectedGoal = values[15] as String,
-            equipment = values[16] as List<GymEquipment>,
-            saved = values[17] as Boolean,
+            daysPerWeek = values[16] as String,
+            sessionDurationMinutes = values[17] as String,
+            experienceLevel = values[18] as String,
+            injuriesOrLimitations = values[19] as String,
+            preferredLanguage = values[20] as String,
+            equipment = values[21] as List<GymEquipment>,
+            saved = values[22] as Boolean,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -120,30 +149,13 @@ class ProfileSetupViewModel @Inject constructor(
     )
 
     init {
-        viewModelScope.launch {
-            repository.seedEquipmentIfNeeded()
-        }
+        viewModelScope.launch { repository.seedEquipmentIfNeeded() }
     }
 
-    fun onNameChanged(value: String) {
-        name.value = value
-        saved.value = false
-    }
-
-    fun onAgeChanged(value: String) {
-        age.value = value.onlyDigits().take(3)
-        saved.value = false
-    }
-
-    fun onHeightChanged(value: String) {
-        heightCm.value = value.onlyDigits().take(3)
-        saved.value = false
-    }
-
-    fun onWeightChanged(value: String) {
-        weightKg.value = value.onlyDigits().take(3)
-        saved.value = false
-    }
+    fun onNameChanged(value: String) { name.value = value; saved.value = false }
+    fun onAgeChanged(value: String) { age.value = value.onlyDigits().take(3); saved.value = false }
+    fun onHeightChanged(value: String) { heightCm.value = value.onlyDigits().take(3); saved.value = false }
+    fun onWeightChanged(value: String) { weightKg.value = value.onlyDigits().take(3); saved.value = false }
 
     fun onBodyFatPercentChanged(value: String) = updateDecimal(bodyFatPercent, value, maxLength = 5)
     fun onSkeletalMuscleMassChanged(value: String) = updateDecimal(skeletalMuscleMassKg, value, maxLength = 5)
@@ -157,10 +169,12 @@ class ProfileSetupViewModel @Inject constructor(
     fun onLeftLegMuscleChanged(value: String) = updateDecimal(leftLegMuscleKg, value, maxLength = 5)
     fun onRightLegMuscleChanged(value: String) = updateDecimal(rightLegMuscleKg, value, maxLength = 5)
 
-    fun onGoalSelected(goal: String) {
-        selectedGoal.value = goal
-        saved.value = false
-    }
+    fun onGoalSelected(goal: String) { selectedGoal.value = goal; saved.value = false }
+    fun onDaysPerWeekChanged(value: String) { daysPerWeek.value = value.onlyDigits().take(1); saved.value = false }
+    fun onSessionDurationChanged(value: String) { sessionDurationMinutes.value = value.onlyDigits().take(3); saved.value = false }
+    fun onExperienceLevelSelected(value: String) { experienceLevel.value = value; saved.value = false }
+    fun onInjuriesChanged(value: String) { injuriesOrLimitations.value = value.take(180); saved.value = false }
+    fun onPreferredLanguageSelected(value: String) { preferredLanguage.value = value; saved.value = false }
 
     fun onEquipmentSwiped(equipment: GymEquipment, available: Boolean) {
         viewModelScope.launch {
@@ -173,9 +187,7 @@ class ProfileSetupViewModel @Inject constructor(
     }
 
     fun onResetEquipment() {
-        viewModelScope.launch {
-            repository.resetEquipmentChoices()
-        }
+        viewModelScope.launch { repository.resetEquipmentChoices() }
         saved.value = false
     }
 
@@ -196,15 +208,21 @@ class ProfileSetupViewModel @Inject constructor(
             trunkMuscleKg = trunkMuscleKg.value.toDoubleOrNull(),
             leftLegMuscleKg = leftLegMuscleKg.value.toDoubleOrNull(),
             rightLegMuscleKg = rightLegMuscleKg.value.toDoubleOrNull(),
-            trainingGoal = selectedGoal.value,
+            trainingGoal = selectedGoal.value.toGoalApiValue(),
+            daysPerWeek = daysPerWeek.value.toIntOrNull()?.coerceIn(2, 7),
+            sessionDurationMinutes = sessionDurationMinutes.value.toIntOrNull()?.coerceIn(20, 180),
+            experienceLevel = experienceLevel.value,
+            injuriesOrLimitations = injuriesOrLimitations.value.ifBlank { "None" },
+            preferredLanguage = preferredLanguage.value,
         )
         if (profile.name.isBlank()) return
-
         viewModelScope.launch {
             repository.saveProfile(profile)
             saved.value = true
         }
     }
+
+    private fun String.toGoalApiValue(): String = TrainingGoals.firstOrNull { it.label == this }?.apiValue ?: this
 
     private fun updateDecimal(target: MutableStateFlow<String>, value: String, maxLength: Int) {
         target.value = value.onlyDecimal().take(maxLength)
@@ -223,10 +241,7 @@ class ProfileSetupViewModel @Inject constructor(
         return filter { char ->
             when {
                 char.isDigit() -> true
-                char == '.' && !dotUsed -> {
-                    dotUsed = true
-                    true
-                }
+                char == '.' && !dotUsed -> { dotUsed = true; true }
                 else -> false
             }
         }

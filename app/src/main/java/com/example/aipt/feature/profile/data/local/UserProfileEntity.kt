@@ -23,6 +23,11 @@ data class UserProfileEntity(
     val leftLegMuscleKg: Double?,
     val rightLegMuscleKg: Double?,
     val trainingGoal: String,
+    val daysPerWeek: Int?,
+    val sessionDurationMinutes: Int?,
+    val experienceLevel: String,
+    val injuriesOrLimitations: String,
+    val preferredLanguage: String,
     val updatedAt: Long,
 )
 
@@ -43,6 +48,11 @@ fun UserProfileEntity.toDomain(): UserProfile = UserProfile(
     leftLegMuscleKg = leftLegMuscleKg,
     rightLegMuscleKg = rightLegMuscleKg,
     trainingGoal = trainingGoal,
+    daysPerWeek = daysPerWeek,
+    sessionDurationMinutes = sessionDurationMinutes,
+    experienceLevel = experienceLevel,
+    injuriesOrLimitations = injuriesOrLimitations,
+    preferredLanguage = preferredLanguage,
 )
 
 fun UserProfile.toEntity(): UserProfileEntity = UserProfileEntity(
@@ -62,5 +72,10 @@ fun UserProfile.toEntity(): UserProfileEntity = UserProfileEntity(
     leftLegMuscleKg = leftLegMuscleKg,
     rightLegMuscleKg = rightLegMuscleKg,
     trainingGoal = trainingGoal,
+    daysPerWeek = daysPerWeek,
+    sessionDurationMinutes = sessionDurationMinutes,
+    experienceLevel = experienceLevel,
+    injuriesOrLimitations = injuriesOrLimitations,
+    preferredLanguage = preferredLanguage,
     updatedAt = System.currentTimeMillis(),
 )

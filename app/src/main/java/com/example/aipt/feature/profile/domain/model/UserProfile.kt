@@ -17,4 +17,9 @@ data class UserProfile(
     val leftLegMuscleKg: Double?,
     val rightLegMuscleKg: Double?,
     val trainingGoal: String,
+    val daysPerWeek: Int?,
+    val sessionDurationMinutes: Int?,
+    val experienceLevel: String,
+    val injuriesOrLimitations: String,
+    val preferredLanguage: String,
 )

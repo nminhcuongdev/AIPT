@@ -13,8 +13,10 @@ import com.example.aipt.feature.exercise.presentation.list.ExerciseListRoute
 import com.example.aipt.feature.profile.presentation.BasicInfoRoute
 import com.example.aipt.feature.profile.presentation.GymEquipmentRoute
 import com.example.aipt.feature.profile.presentation.InBodyRoute
+import com.example.aipt.feature.profile.presentation.PreferencesRoute
 import com.example.aipt.feature.profile.presentation.ProfileSetupViewModel
 import com.example.aipt.feature.profile.presentation.TrainingGoalRoute
+import com.example.aipt.feature.workout.presentation.WorkoutPlanRoute
 
 @Composable
 fun AppNavHost() {
@@ -28,7 +30,7 @@ fun AppNavHost() {
             startDestination = Screen.BasicInfo.route,
             route = Screen.ProfileFlow.route,
         ) {
-            composable(Screen.BasicInfo.route) { entry ->
+            composable(Screen.BasicInfo.route) {
                 val parentEntry = navController.getBackStackEntry(Screen.ProfileFlow.route)
                 val viewModel = hiltViewModel<ProfileSetupViewModel>(parentEntry)
                 BasicInfoRoute(
@@ -36,7 +38,7 @@ fun AppNavHost() {
                     onNext = { navController.navigate(Screen.InBody.route) },
                 )
             }
-            composable(Screen.InBody.route) { entry ->
+            composable(Screen.InBody.route) {
                 val parentEntry = navController.getBackStackEntry(Screen.ProfileFlow.route)
                 val viewModel = hiltViewModel<ProfileSetupViewModel>(parentEntry)
                 InBodyRoute(
@@ -45,16 +47,25 @@ fun AppNavHost() {
                     onNext = { navController.navigate(Screen.TrainingGoal.route) },
                 )
             }
-            composable(Screen.TrainingGoal.route) { entry ->
+            composable(Screen.TrainingGoal.route) {
                 val parentEntry = navController.getBackStackEntry(Screen.ProfileFlow.route)
                 val viewModel = hiltViewModel<ProfileSetupViewModel>(parentEntry)
                 TrainingGoalRoute(
                     viewModel = viewModel,
                     onBack = navController::popBackStack,
+                    onNext = { navController.navigate(Screen.Preferences.route) },
+                )
+            }
+            composable(Screen.Preferences.route) {
+                val parentEntry = navController.getBackStackEntry(Screen.ProfileFlow.route)
+                val viewModel = hiltViewModel<ProfileSetupViewModel>(parentEntry)
+                PreferencesRoute(
+                    viewModel = viewModel,
+                    onBack = navController::popBackStack,
                     onNext = { navController.navigate(Screen.GymEquipment.route) },
                 )
             }
-            composable(Screen.GymEquipment.route) { entry ->
+            composable(Screen.GymEquipment.route) {
                 val parentEntry = navController.getBackStackEntry(Screen.ProfileFlow.route)
                 val viewModel = hiltViewModel<ProfileSetupViewModel>(parentEntry)
                 GymEquipmentRoute(
@@ -72,10 +83,14 @@ fun AppNavHost() {
         composable(Screen.ExerciseList.route) {
             ExerciseListRoute(
                 onProfileClick = { navController.navigate(Screen.ProfileFlow.route) },
+                onWorkoutPlanClick = { navController.navigate(Screen.WorkoutPlan.route) },
                 onExerciseClick = { exerciseId ->
                     navController.navigate(Screen.ExerciseDetail.createRoute(exerciseId))
                 },
             )
+        }
+        composable(Screen.WorkoutPlan.route) {
+            WorkoutPlanRoute(onBackClick = navController::popBackStack)
         }
         composable(
             route = Screen.ExerciseDetail.route,

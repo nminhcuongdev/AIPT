@@ -1,6 +1,7 @@
 package com.example.aipt.di
 
 import com.example.aipt.core.network.ApiService
+import com.example.aipt.feature.workout.data.remote.WorkoutPlanApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,7 +16,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideRetrofit(): Retrofit = Retrofit.Builder()
-        .baseUrl("https://example.com/")
+        .baseUrl("http://10.84.30.20:8000/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -23,4 +24,9 @@ object NetworkModule {
     @Singleton
     fun provideApiService(retrofit: Retrofit): ApiService =
         retrofit.create(ApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideWorkoutPlanApi(retrofit: Retrofit): WorkoutPlanApi =
+        retrofit.create(WorkoutPlanApi::class.java)
 }
