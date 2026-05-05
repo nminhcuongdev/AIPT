@@ -20,17 +20,17 @@ data class ProfileSetupUiState(
     val age: String = "",
     val heightCm: String = "",
     val weightKg: String = "",
-    val bodyFatPercent: String = "",
-    val skeletalMuscleMassKg: String = "",
-    val bodyWaterPercent: String = "",
-    val visceralFatLevel: String = "",
-    val basalMetabolicRateKcal: String = "",
-    val waistHipRatio: String = "",
-    val leftArmMuscleKg: String = "",
-    val rightArmMuscleKg: String = "",
-    val trunkMuscleKg: String = "",
-    val leftLegMuscleKg: String = "",
-    val rightLegMuscleKg: String = "",
+    val bodyFatPercent: String = "18.9",
+    val skeletalMuscleMassKg: String = "28.5",
+    val bodyWaterLiters: String = "37",
+    val visceralFatLevel: String = "4",
+    val basalMetabolicRateKcal: String = "1460",
+    val waistHipRatio: String = "0.80",
+    val leftArmMuscleKg: String = "2.62",
+    val rightArmMuscleKg: String = "2.59",
+    val trunkMuscleKg: String = "22.1",
+    val leftLegMuscleKg: String = "8.19",
+    val rightLegMuscleKg: String = "7.89",
     val selectedGoal: String = TrainingGoals.first().label,
     val daysPerWeek: String = "5",
     val sessionDurationMinutes: String = "60",
@@ -72,17 +72,17 @@ class ProfileSetupViewModel @Inject constructor(
     private val age = MutableStateFlow("")
     private val heightCm = MutableStateFlow("")
     private val weightKg = MutableStateFlow("")
-    private val bodyFatPercent = MutableStateFlow("")
-    private val skeletalMuscleMassKg = MutableStateFlow("")
-    private val bodyWaterPercent = MutableStateFlow("")
-    private val visceralFatLevel = MutableStateFlow("")
-    private val basalMetabolicRateKcal = MutableStateFlow("")
-    private val waistHipRatio = MutableStateFlow("")
-    private val leftArmMuscleKg = MutableStateFlow("")
-    private val rightArmMuscleKg = MutableStateFlow("")
-    private val trunkMuscleKg = MutableStateFlow("")
-    private val leftLegMuscleKg = MutableStateFlow("")
-    private val rightLegMuscleKg = MutableStateFlow("")
+    private val bodyFatPercent = MutableStateFlow("18.9")
+    private val skeletalMuscleMassKg = MutableStateFlow("28.5")
+    private val bodyWaterLiters = MutableStateFlow("37")
+    private val visceralFatLevel = MutableStateFlow("4")
+    private val basalMetabolicRateKcal = MutableStateFlow("1460")
+    private val waistHipRatio = MutableStateFlow("0.80")
+    private val leftArmMuscleKg = MutableStateFlow("2.62")
+    private val rightArmMuscleKg = MutableStateFlow("2.59")
+    private val trunkMuscleKg = MutableStateFlow("22.1")
+    private val leftLegMuscleKg = MutableStateFlow("8.19")
+    private val rightLegMuscleKg = MutableStateFlow("7.89")
     private val selectedGoal = MutableStateFlow(TrainingGoals.first().label)
     private val daysPerWeek = MutableStateFlow("5")
     private val sessionDurationMinutes = MutableStateFlow("60")
@@ -98,7 +98,7 @@ class ProfileSetupViewModel @Inject constructor(
         weightKg,
         bodyFatPercent,
         skeletalMuscleMassKg,
-        bodyWaterPercent,
+        bodyWaterLiters,
         visceralFatLevel,
         basalMetabolicRateKcal,
         waistHipRatio,
@@ -124,7 +124,7 @@ class ProfileSetupViewModel @Inject constructor(
             weightKg = values[3] as String,
             bodyFatPercent = values[4] as String,
             skeletalMuscleMassKg = values[5] as String,
-            bodyWaterPercent = values[6] as String,
+            bodyWaterLiters = values[6] as String,
             visceralFatLevel = values[7] as String,
             basalMetabolicRateKcal = values[8] as String,
             waistHipRatio = values[9] as String,
@@ -159,7 +159,7 @@ class ProfileSetupViewModel @Inject constructor(
 
     fun onBodyFatPercentChanged(value: String) = updateDecimal(bodyFatPercent, value, maxLength = 5)
     fun onSkeletalMuscleMassChanged(value: String) = updateDecimal(skeletalMuscleMassKg, value, maxLength = 5)
-    fun onBodyWaterPercentChanged(value: String) = updateDecimal(bodyWaterPercent, value, maxLength = 5)
+    fun onBodyWaterLitersChanged(value: String) = updateDecimal(bodyWaterLiters, value, maxLength = 5)
     fun onVisceralFatLevelChanged(value: String) = updateInteger(visceralFatLevel, value, maxLength = 2)
     fun onBasalMetabolicRateChanged(value: String) = updateInteger(basalMetabolicRateKcal, value, maxLength = 4)
     fun onWaistHipRatioChanged(value: String) = updateDecimal(waistHipRatio, value, maxLength = 4)
@@ -199,7 +199,7 @@ class ProfileSetupViewModel @Inject constructor(
             weightKg = weightKg.value.toIntOrNull(),
             bodyFatPercent = bodyFatPercent.value.toDoubleOrNull(),
             skeletalMuscleMassKg = skeletalMuscleMassKg.value.toDoubleOrNull(),
-            bodyWaterPercent = bodyWaterPercent.value.toDoubleOrNull(),
+            bodyWaterLiters = bodyWaterLiters.value.toDoubleOrNull(),
             visceralFatLevel = visceralFatLevel.value.toIntOrNull(),
             basalMetabolicRateKcal = basalMetabolicRateKcal.value.toIntOrNull(),
             waistHipRatio = waistHipRatio.value.toDoubleOrNull(),

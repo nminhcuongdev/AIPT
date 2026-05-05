@@ -51,6 +51,7 @@ import com.example.aipt.ui.theme.Volt
 fun ExerciseListRoute(
     onProfileClick: () -> Unit,
     onWorkoutPlanClick: () -> Unit,
+    onProgressClick: () -> Unit,
     onExerciseClick: (Int) -> Unit,
     viewModel: ExerciseListViewModel = hiltViewModel(),
 ) {
@@ -60,7 +61,8 @@ fun ExerciseListRoute(
         state = state,
         onProfileClick = onProfileClick,
         onWorkoutPlanClick = onWorkoutPlanClick,
-        onSearchQueryChanged = viewModel::onSearchQueryChanged,
+                onProgressClick = onProgressClick,
+onSearchQueryChanged = viewModel::onSearchQueryChanged,
         onMuscleGroupSelected = viewModel::onMuscleGroupSelected,
         onFavoritesOnlyChanged = viewModel::onFavoritesOnlyChanged,
         onFavoriteClicked = viewModel::onFavoriteClicked,
@@ -73,6 +75,7 @@ private fun ExerciseListScreen(
     state: ExerciseListUiState,
     onProfileClick: () -> Unit,
     onWorkoutPlanClick: () -> Unit,
+    onProgressClick: () -> Unit,
     onSearchQueryChanged: (String) -> Unit,
     onMuscleGroupSelected: (String) -> Unit,
     onFavoritesOnlyChanged: () -> Unit,
@@ -88,7 +91,8 @@ private fun ExerciseListScreen(
                 trailing = {
                     Column(horizontalAlignment = Alignment.End) {
                         TextButton(onClick = onProfileClick) { Text("Profile") }
-                        TextButton(onClick = onWorkoutPlanClick) { Text("Plan") }
+                        TextButton(onClick = onWorkoutPlanClick) { Text("Create plan") }
+                        TextButton(onClick = onProgressClick) { Text("Track progress") }
                     }
                 },
             )

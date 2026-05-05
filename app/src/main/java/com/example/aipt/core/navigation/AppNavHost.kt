@@ -16,6 +16,7 @@ import com.example.aipt.feature.profile.presentation.InBodyRoute
 import com.example.aipt.feature.profile.presentation.PreferencesRoute
 import com.example.aipt.feature.profile.presentation.ProfileSetupViewModel
 import com.example.aipt.feature.profile.presentation.TrainingGoalRoute
+import com.example.aipt.feature.workout.presentation.ProgressTrackingRoute
 import com.example.aipt.feature.workout.presentation.WorkoutPlanRoute
 
 @Composable
@@ -72,8 +73,7 @@ fun AppNavHost() {
                     viewModel = viewModel,
                     onBack = navController::popBackStack,
                     onFinish = {
-                        navController.navigate(Screen.ExerciseList.route) {
-                            popUpTo(Screen.ProfileFlow.route) { inclusive = true }
+                        navController.navigate(Screen.WorkoutPlan.route) {
                             launchSingleTop = true
                         }
                     },
@@ -84,13 +84,20 @@ fun AppNavHost() {
             ExerciseListRoute(
                 onProfileClick = { navController.navigate(Screen.ProfileFlow.route) },
                 onWorkoutPlanClick = { navController.navigate(Screen.WorkoutPlan.route) },
+                onProgressClick = { navController.navigate(Screen.WorkoutProgress.route) },
                 onExerciseClick = { exerciseId ->
                     navController.navigate(Screen.ExerciseDetail.createRoute(exerciseId))
                 },
             )
         }
         composable(Screen.WorkoutPlan.route) {
-            WorkoutPlanRoute(onBackClick = navController::popBackStack)
+            WorkoutPlanRoute(
+                onBackClick = navController::popBackStack,
+                onTrackProgressClick = { navController.navigate(Screen.WorkoutProgress.route) },
+            )
+        }
+        composable(Screen.WorkoutProgress.route) {
+            ProgressTrackingRoute(onBackClick = navController::popBackStack)
         }
         composable(
             route = Screen.ExerciseDetail.route,

@@ -30,7 +30,7 @@ class WorkoutPlanGenerator @Inject constructor() {
         bodyComposition = BodyComposition(
             bodyFatPercentage = profile.bodyFatPercent,
             skeletalMuscleMassKg = profile.skeletalMuscleMassKg,
-            bodyWaterPercentage = profile.bodyWaterPercent,
+            bodyWaterLiters = profile.bodyWaterLiters,
             visceralFatLevel = profile.visceralFatLevel,
             bmrKcal = profile.basalMetabolicRateKcal,
             waistToHipRatio = profile.waistHipRatio,

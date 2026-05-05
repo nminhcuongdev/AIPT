@@ -21,7 +21,7 @@ data class BasicProfile(
 data class BodyComposition(
     @SerializedName("body_fat_percentage") val bodyFatPercentage: Double?,
     @SerializedName("skeletal_muscle_mass_kg") val skeletalMuscleMassKg: Double?,
-    @SerializedName("body_water_percentage") val bodyWaterPercentage: Double?,
+    @SerializedName("body_water_liters") val bodyWaterLiters: Double?,
     @SerializedName("visceral_fat_level") val visceralFatLevel: Int?,
     @SerializedName("bmr_kcal") val bmrKcal: Int?,
     @SerializedName("waist_to_hip_ratio") val waistToHipRatio: Double?,
@@ -75,10 +75,10 @@ data class WorkoutDay(
 
 data class PlannedExercise(
     @SerializedName("name") val name: String,
-    @SerializedName("sets") val sets: Int,
-    @SerializedName("reps") val reps: String,
+    @SerializedName("sets") val sets: Int?,
+    @SerializedName("reps") val reps: String?,
     @SerializedName("duration_minutes") val durationMinutes: Int?,
-    @SerializedName("rest_seconds") val restSeconds: Int,
+    @SerializedName("rest_seconds") val restSeconds: Int?,
     @SerializedName("intensity") val intensity: String,
     @SerializedName("equipment") val equipment: List<String>,
     @SerializedName("notes") val notes: String,
@@ -93,4 +93,26 @@ data class NutritionGuidance(
     @SerializedName("calorie_guidance") val calorieGuidance: String,
     @SerializedName("protein_guidance") val proteinGuidance: String,
     @SerializedName("hydration_guidance") val hydrationGuidance: String,
+)
+
+data class WorkoutProgressAnalysisRequest(
+    @SerializedName("performed_at") val performedAt: Long,
+    @SerializedName("entries") val entries: List<WorkoutProgressEntry>,
+)
+
+data class WorkoutProgressEntry(
+    @SerializedName("exercise_name") val exerciseName: String,
+    @SerializedName("weight_kg") val weightKg: Double?,
+    @SerializedName("sets") val sets: Int?,
+    @SerializedName("reps") val reps: Int?,
+    @SerializedName("notes") val notes: String?,
+)
+
+data class WorkoutProgressAnalysisResponse(
+    @SerializedName("analysis_summary") val analysisSummary: String?,
+    @SerializedName("advice") val advice: String?,
+    @SerializedName("recommendations") val recommendations: List<String>?,
+    @SerializedName("next_steps") val nextSteps: List<String>?,
+    @SerializedName("safety_notes") val safetyNotes: List<String>?,
+    @SerializedName("model") val model: String?,
 )

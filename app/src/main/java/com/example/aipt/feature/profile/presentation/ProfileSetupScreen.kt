@@ -74,7 +74,7 @@ fun InBodyRoute(onBack: () -> Unit, onNext: () -> Unit, viewModel: ProfileSetupV
         state = state,
         onBodyFatPercentChanged = viewModel::onBodyFatPercentChanged,
         onSkeletalMuscleMassChanged = viewModel::onSkeletalMuscleMassChanged,
-        onBodyWaterPercentChanged = viewModel::onBodyWaterPercentChanged,
+        onBodyWaterLitersChanged = viewModel::onBodyWaterLitersChanged,
         onVisceralFatLevelChanged = viewModel::onVisceralFatLevelChanged,
         onBasalMetabolicRateChanged = viewModel::onBasalMetabolicRateChanged,
         onWaistHipRatioChanged = viewModel::onWaistHipRatioChanged,
@@ -155,7 +155,7 @@ private fun InBodyScreen(
     state: ProfileSetupUiState,
     onBodyFatPercentChanged: (String) -> Unit,
     onSkeletalMuscleMassChanged: (String) -> Unit,
-    onBodyWaterPercentChanged: (String) -> Unit,
+    onBodyWaterLitersChanged: (String) -> Unit,
     onVisceralFatLevelChanged: (String) -> Unit,
     onBasalMetabolicRateChanged: (String) -> Unit,
     onWaistHipRatioChanged: (String) -> Unit,
@@ -181,7 +181,7 @@ private fun InBodyScreen(
                     }
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        DecimalField(state.bodyWaterPercent, onBodyWaterPercentChanged, "Water %", Modifier.weight(1f))
+                        DecimalField(state.bodyWaterLiters, onBodyWaterLitersChanged, "Water L", Modifier.weight(1f))
                         NumberField(state.visceralFatLevel, onVisceralFatLevelChanged, "Visceral", Modifier.weight(1f))
                     }
                     Spacer(Modifier.height(12.dp))

@@ -7,7 +7,7 @@ data class UserProfile(
     val weightKg: Int?,
     val bodyFatPercent: Double?,
     val skeletalMuscleMassKg: Double?,
-    val bodyWaterPercent: Double?,
+    val bodyWaterLiters: Double?,
     val visceralFatLevel: Int?,
     val basalMetabolicRateKcal: Int?,
     val waistHipRatio: Double?,

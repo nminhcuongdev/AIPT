@@ -41,26 +41,33 @@ import com.example.aipt.ui.theme.Volt
 @Composable
 fun WorkoutPlanRoute(
     onBackClick: () -> Unit,
+    onTrackProgressClick: () -> Unit,
     viewModel: WorkoutPlanViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
-    WorkoutPlanScreen(state = state, onBackClick = onBackClick, onRetry = viewModel::retry)
+    WorkoutPlanScreen(state = state, onBackClick = onBackClick, onTrackProgressClick = onTrackProgressClick, onRetry = viewModel::retry)
 }
 
 @Composable
 private fun WorkoutPlanScreen(
     state: WorkoutPlanUiState,
     onBackClick: () -> Unit,
+    onTrackProgressClick: () -> Unit,
     onRetry: () -> Unit,
 ) {
     Scaffold(containerColor = Color.Transparent) { padding ->
         AiptScreen(modifier = Modifier.padding(padding), contentPadding = PaddingValues(horizontal = 18.dp, vertical = 16.dp)) {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                TextButton(onClick = onBackClick) { Text("Back") }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    TextButton(onClick = onBackClick) { Text("Back") }
+                    TextButton(onClick = onTrackProgressClick) { Text("Track progress") }
+                }
                 Spacer(Modifier.height(8.dp))
                 when {
                     state.isProfileMissing -> MissingProfileState()
-                    state.response == null -> CircularProgressIndicator()
+                    state.isLoading -> LoadingState()
+                    state.errorMessage != null -> ErrorState(state.errorMessage, onRetry)
+                    state.response == null -> ErrorState("No workout plan response was returned.", onRetry)
                     else -> {
                         val response = state.response
                         val plan = response.plan
@@ -79,6 +86,10 @@ private fun WorkoutPlanScreen(
                                     request.preferences.experienceLevel to "level",
                                 ),
                             )
+                        }
+                        Spacer(Modifier.height(18.dp))
+                        Button(onClick = onTrackProgressClick, modifier = Modifier.fillMaxWidth().height(54.dp)) {
+                            Text("Track workout progress")
                         }
                         Spacer(Modifier.height(18.dp))
                         GuidancePanel("Follow-up questions", plan.followUpQuestions)
@@ -156,7 +167,13 @@ private fun WorkoutDayCard(day: WorkoutDay) {
         day.exercises.forEach { exercise ->
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
                 Text(exercise.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = Ink900)
-                Text("${exercise.sets} sets x ${exercise.reps} reps ・ゑｽｷ ${exercise.restSeconds}s rest ・ゑｽｷ ${exercise.intensity}")
+                val prescription = buildList {
+                    exercise.sets?.let { add("$it sets") }
+                    exercise.reps?.let { add("$it reps") }
+                    exercise.restSeconds?.let { add("${it}s rest") }
+                    add(exercise.intensity)
+                }.joinToString(" - ")
+                Text(prescription)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     exercise.equipment.forEach { item -> AssistChip(onClick = {}, label = { Text(item) }) }
                 }
