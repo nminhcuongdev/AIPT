@@ -6,6 +6,7 @@ import com.example.aipt.core.data.local.AiptDatabase
 import com.example.aipt.feature.exercise.data.local.ExerciseDao
 import com.example.aipt.feature.profile.data.local.GymEquipmentDao
 import com.example.aipt.feature.profile.data.local.UserProfileDao
+import com.example.aipt.feature.workout.data.local.WorkoutDayDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,4 +34,7 @@ object DatabaseModule {
 
     @Provides
     fun provideGymEquipmentDao(database: AiptDatabase): GymEquipmentDao = database.gymEquipmentDao()
+
+    @Provides
+    fun provideWorkoutDayDao(database: AiptDatabase): WorkoutDayDao = database.workoutDayDao()
 }

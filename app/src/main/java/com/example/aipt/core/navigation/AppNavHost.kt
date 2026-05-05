@@ -25,8 +25,24 @@ fun AppNavHost() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.ProfileFlow.route,
+        startDestination = Screen.Startup.route,
     ) {
+        composable(Screen.Startup.route) {
+            StartupRoute(
+                onProfileMissing = {
+                    navController.navigate(Screen.ProfileFlow.route) {
+                        popUpTo(Screen.Startup.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onProfileReady = {
+                    navController.navigate(Screen.WorkoutPlan.route) {
+                        popUpTo(Screen.Startup.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
         navigation(
             startDestination = Screen.BasicInfo.route,
             route = Screen.ProfileFlow.route,

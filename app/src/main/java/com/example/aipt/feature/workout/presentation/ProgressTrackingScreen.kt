@@ -15,7 +15,6 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,7 +22,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -34,8 +32,7 @@ import com.example.aipt.core.ui.components.AiptHeroHeader
 import com.example.aipt.core.ui.components.AiptPanel
 import com.example.aipt.core.ui.components.AiptPill
 import com.example.aipt.core.ui.components.AiptScreen
-import com.example.aipt.feature.workout.domain.model.WorkoutProgressAnalysisResponse
-import com.example.aipt.feature.workout.domain.model.WorkoutProgressEntry
+import com.example.aipt.feature.workout.domain.model.WorkoutDayProgressAnalysisResponse
 import com.example.aipt.ui.theme.Ember
 import com.example.aipt.ui.theme.Ink900
 import com.example.aipt.ui.theme.Sea
@@ -50,14 +47,11 @@ fun ProgressTrackingRoute(
     ProgressTrackingScreen(
         state = state,
         onBackClick = onBackClick,
-        onExerciseNameChanged = viewModel::onExerciseNameChanged,
         onWeightKgChanged = viewModel::onWeightKgChanged,
-        onSetsChanged = viewModel::onSetsChanged,
         onRepsChanged = viewModel::onRepsChanged,
-        onNotesChanged = viewModel::onNotesChanged,
-        onAddEntry = viewModel::addEntry,
-        onRemoveEntry = viewModel::removeEntry,
-        onAnalyze = viewModel::analyzeProgress,
+        onNoteChanged = viewModel::onNoteChanged,
+        onAnalyzeDay = viewModel::analyzeDay,
+        onConfirmDay = viewModel::confirmSuggestedDay,
     )
 }
 
@@ -65,14 +59,11 @@ fun ProgressTrackingRoute(
 private fun ProgressTrackingScreen(
     state: ProgressTrackingUiState,
     onBackClick: () -> Unit,
-    onExerciseNameChanged: (String) -> Unit,
-    onWeightKgChanged: (String) -> Unit,
-    onSetsChanged: (String) -> Unit,
-    onRepsChanged: (String) -> Unit,
-    onNotesChanged: (String) -> Unit,
-    onAddEntry: () -> Unit,
-    onRemoveEntry: (Int) -> Unit,
-    onAnalyze: () -> Unit,
+    onWeightKgChanged: (String, String) -> Unit,
+    onRepsChanged: (String, String) -> Unit,
+    onNoteChanged: (String, String) -> Unit,
+    onAnalyzeDay: (Int) -> Unit,
+    onConfirmDay: (Int) -> Unit,
 ) {
     Scaffold(containerColor = Color.Transparent) { padding ->
         AiptScreen(modifier = Modifier.padding(padding), contentPadding = PaddingValues(horizontal = 18.dp, vertical = 16.dp)) {
@@ -81,43 +72,21 @@ private fun ProgressTrackingScreen(
                 Spacer(Modifier.height(8.dp))
                 AiptHeroHeader(
                     eyebrow = "Progress Tracking",
-                    title = "Log lifts and reps",
-                    description = "Record actual workout numbers, then send them to the API for progression advice.",
+                    title = "Track each training day",
+                    description = "Save one workout day at a time. Each day is analyzed separately and updated for next week when the API returns a new day plan.",
                 )
                 Spacer(Modifier.height(16.dp))
-                AiptPanel {
-                    OutlinedTextField(
-                        value = state.exerciseName,
-                        onValueChange = onExerciseNameChanged,
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        label = { Text("Exercise") },
-                        placeholder = { Text("Dumbbell Bench Press") },
+                when {
+                    state.isLoading && state.schedule.isEmpty() -> LoadingPlanPanel()
+                    state.isPlanMissing -> MissingPlanPanel()
+                    else -> ScheduleTrackingPanel(
+                        state = state,
+                        onWeightKgChanged = onWeightKgChanged,
+                        onRepsChanged = onRepsChanged,
+                        onNoteChanged = onNoteChanged,
+                        onAnalyzeDay = onAnalyzeDay,
+                        onConfirmDay = onConfirmDay,
                     )
-                    Spacer(Modifier.height(12.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        DecimalField(state.weightKg, onWeightKgChanged, "Weight kg", Modifier.weight(1f))
-                        NumberField(state.sets, onSetsChanged, "Sets", Modifier.weight(1f))
-                        NumberField(state.reps, onRepsChanged, "Reps", Modifier.weight(1f))
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    OutlinedTextField(
-                        value = state.notes,
-                        onValueChange = onNotesChanged,
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 2,
-                        label = { Text("Notes") },
-                    )
-                    Spacer(Modifier.height(14.dp))
-                    Button(onClick = onAddEntry, enabled = state.canAdd, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-                        Text("Add entry")
-                    }
-                }
-                Spacer(Modifier.height(14.dp))
-                EntryListPanel(state.entries, onRemoveEntry)
-                Spacer(Modifier.height(14.dp))
-                Button(onClick = onAnalyze, enabled = state.canAnalyze, modifier = Modifier.fillMaxWidth().height(54.dp)) {
-                    if (state.isLoading) CircularProgressIndicator(color = Ink900) else Text("Analyze progress")
                 }
                 if (state.errorMessage != null) {
                     Spacer(Modifier.height(14.dp))
@@ -127,10 +96,6 @@ private fun ProgressTrackingScreen(
                         Text(state.errorMessage, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-                if (state.response != null) {
-                    Spacer(Modifier.height(14.dp))
-                    AnalysisPanel(state.response)
-                }
                 Spacer(Modifier.height(24.dp))
             }
         }
@@ -138,51 +103,161 @@ private fun ProgressTrackingScreen(
 }
 
 @Composable
-private fun EntryListPanel(entries: List<WorkoutProgressEntry>, onRemoveEntry: (Int) -> Unit) {
+private fun LoadingPlanPanel() {
     AiptPanel {
-        Text("Logged entries", style = MaterialTheme.typography.titleLarge, color = Ink900)
-        Spacer(Modifier.height(8.dp))
-        if (entries.isEmpty()) {
-            Text("No workout entries yet.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        } else {
-            entries.forEachIndexed { index, entry ->
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(entry.exerciseName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = Ink900)
-                            Text(entry.summary(), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        OutlinedButton(onClick = { onRemoveEntry(index) }) { Text("Remove") }
-                    }
-                    if (!entry.notes.isNullOrBlank()) {
-                        Spacer(Modifier.height(4.dp))
-                        Text(entry.notes, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            CircularProgressIndicator()
+            Column {
+                Text("Creating workout blueprint", style = MaterialTheme.typography.titleLarge, color = Ink900)
+                Text("Using your saved profile to prepare the tracking schedule.", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
 }
 
 @Composable
-private fun AnalysisPanel(response: WorkoutProgressAnalysisResponse) {
+private fun MissingPlanPanel() {
     AiptPanel {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-            AiptPill("AI advice", containerColor = Volt, contentColor = Ink900)
-            response.model?.let { AssistChip(onClick = {}, label = { Text(it) }) }
+        Text("Workout plan required", style = MaterialTheme.typography.titleLarge, color = Ink900)
+        Spacer(Modifier.height(8.dp))
+        Text("Create a weekly training blueprint first, then return here to track each planned exercise.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun ScheduleTrackingPanel(
+    state: ProgressTrackingUiState,
+    onWeightKgChanged: (String, String) -> Unit,
+    onRepsChanged: (String, String) -> Unit,
+    onNoteChanged: (String, String) -> Unit,
+    onAnalyzeDay: (Int) -> Unit,
+    onConfirmDay: (Int) -> Unit,
+) {
+    state.schedule.groupBy { it.day to it.dayTitle }.forEach { (day, exercises) ->
+        val dayNumber = day.first
+        val dayStatus = state.dayStatuses[dayNumber]
+        AiptPanel {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                AiptPill("Day $dayNumber", containerColor = Volt, contentColor = Ink900)
+                AiptPill(day.second, containerColor = Ink900)
+            }
+            Spacer(Modifier.height(12.dp))
+            exercises.forEach { exercise ->
+                ExerciseTrackingRow(
+                    exercise = exercise,
+                    onWeightKgChanged = onWeightKgChanged,
+                    onRepsChanged = onRepsChanged,
+                    onNoteChanged = onNoteChanged,
+                )
+                Spacer(Modifier.height(14.dp))
+            }
+            Button(
+                onClick = { onAnalyzeDay(dayNumber) },
+                enabled = state.canAnalyzeDay(dayNumber),
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+            ) {
+                if (dayStatus?.isLoading == true) CircularProgressIndicator(color = Ink900) else Text("Save day and update next week")
+            }
+            if (dayStatus?.errorMessage != null) {
+                Spacer(Modifier.height(10.dp))
+                Text(dayStatus.errorMessage, color = Ember)
+            }
+            if (dayStatus?.response != null) {
+                Spacer(Modifier.height(12.dp))
+                DayAnalysisPanel(
+                    response = dayStatus.response,
+                    isConfirmed = dayStatus.isConfirmed,
+                    canConfirm = state.canConfirmDay(dayNumber),
+                    onConfirm = { onConfirmDay(dayNumber) },
+                )
+            }
+        }
+        Spacer(Modifier.height(14.dp))
+    }
+}
+
+@Composable
+private fun ExerciseTrackingRow(
+    exercise: ProgressExerciseLogUiState,
+    onWeightKgChanged: (String, String) -> Unit,
+    onRepsChanged: (String, String) -> Unit,
+    onNoteChanged: (String, String) -> Unit,
+) {
+    Column {
+        Text(exercise.exerciseName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = Ink900)
+        if (exercise.plannedPrescription.isNotBlank()) {
+            Text(exercise.plannedPrescription, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        if (exercise.equipment.isNotEmpty()) {
+            Spacer(Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                exercise.equipment.forEach { item -> AssistChip(onClick = {}, label = { Text(item) }) }
+            }
         }
         Spacer(Modifier.height(10.dp))
-        response.analysisSummary?.takeIf { it.isNotBlank() }?.let {
-            Text(it, style = MaterialTheme.typography.bodyLarge, color = Ink900)
-            Spacer(Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            DecimalField(
+                value = exercise.weightKg,
+                onValueChange = { onWeightKgChanged(exercise.id, it) },
+                label = "Weight kg",
+                modifier = Modifier.weight(1f),
+            )
+            NumberField(
+                value = exercise.reps,
+                onValueChange = { onRepsChanged(exercise.id, it) },
+                label = "Reps",
+                modifier = Modifier.weight(1f),
+            )
         }
-        response.advice?.takeIf { it.isNotBlank() }?.let {
-            Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(10.dp))
+        OutlinedTextField(
+            value = exercise.note,
+            onValueChange = { onNoteChanged(exercise.id, it) },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 2,
+            label = { Text("Note") },
+        )
+    }
+}
+
+@Composable
+private fun DayAnalysisPanel(
+    response: WorkoutDayProgressAnalysisResponse,
+    isConfirmed: Boolean,
+    canConfirm: Boolean,
+    onConfirm: () -> Unit,
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        AiptPill("Day updated", containerColor = Sea, contentColor = Ink900)
+        response.model?.let { AssistChip(onClick = {}, label = { Text(it) }) }
+    }
+    Spacer(Modifier.height(10.dp))
+    response.analysisSummary?.takeIf { it.isNotBlank() }?.let {
+        Text(it, style = MaterialTheme.typography.bodyLarge, color = Ink900)
+        Spacer(Modifier.height(10.dp))
+    }
+    response.advice?.takeIf { it.isNotBlank() }?.let {
+        Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(10.dp))
+    }
+    AdviceList("Recommendations", response.recommendations, Sea)
+    AdviceList("Next steps", response.nextSteps, Ink900)
+    AdviceList("Safety notes", response.safetyNotes, Ember)
+    if (response.nextWeekDay != null) {
+        Spacer(Modifier.height(8.dp))
+        if (isConfirmed) {
+            Text("Confirmed and saved to workout schedule.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else {
+            Text("API suggested a next-week schedule for this day.", color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(10.dp))
+            Button(
+                onClick = onConfirm,
+                enabled = canConfirm,
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+            ) {
+                Text("Confirm and save this day")
+            }
         }
-        AdviceList("Recommendations", response.recommendations, Sea)
-        AdviceList("Next steps", response.nextSteps, Ink900)
-        AdviceList("Safety notes", response.safetyNotes, Ember)
     }
 }
 
@@ -222,9 +297,3 @@ private fun DecimalField(value: String, onValueChange: (String) -> Unit, label: 
         label = { Text(label) },
     )
 }
-
-private fun WorkoutProgressEntry.summary(): String = buildList {
-    weightKg?.let { add("$it kg") }
-    sets?.let { add("$it sets") }
-    reps?.let { add("$it reps") }
-}.joinToString(" - ").ifBlank { "No numbers" }

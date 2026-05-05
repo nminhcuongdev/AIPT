@@ -1,5 +1,7 @@
 package com.example.aipt.feature.workout.data.remote
 
+import com.example.aipt.feature.workout.domain.model.WorkoutDayProgressAnalysisRequest
+import com.example.aipt.feature.workout.domain.model.WorkoutDayProgressAnalysisResponse
 import com.example.aipt.feature.workout.domain.model.WorkoutPlanRequest
 import com.example.aipt.feature.workout.domain.model.WorkoutPlanResponse
 import com.example.aipt.feature.workout.domain.model.WorkoutProgressAnalysisRequest
@@ -12,6 +14,11 @@ interface WorkoutPlanApi {
     suspend fun createWorkoutPlan(
         @Body request: WorkoutPlanRequest,
     ): WorkoutPlanResponse
+
+    @POST("api/v1/workout-progress/analyze-day")
+    suspend fun analyzeWorkoutDayProgress(
+        @Body request: WorkoutDayProgressAnalysisRequest,
+    ): WorkoutDayProgressAnalysisResponse
 
     @POST("api/v1/workout-progress/analyze")
     suspend fun analyzeWorkoutProgress(

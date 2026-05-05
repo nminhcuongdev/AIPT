@@ -116,3 +116,19 @@ data class WorkoutProgressAnalysisResponse(
     @SerializedName("safety_notes") val safetyNotes: List<String>?,
     @SerializedName("model") val model: String?,
 )
+data class WorkoutDayProgressAnalysisRequest(
+    @SerializedName("performed_at") val performedAt: Long,
+    @SerializedName("day") val day: Int,
+    @SerializedName("day_title") val dayTitle: String,
+    @SerializedName("entries") val entries: List<WorkoutProgressEntry>,
+)
+
+data class WorkoutDayProgressAnalysisResponse(
+    @SerializedName("analysis_summary") val analysisSummary: String?,
+    @SerializedName("advice") val advice: String?,
+    @SerializedName("recommendations") val recommendations: List<String>?,
+    @SerializedName("next_steps") val nextSteps: List<String>?,
+    @SerializedName("safety_notes") val safetyNotes: List<String>?,
+    @SerializedName("next_week_day") val nextWeekDay: WorkoutDay?,
+    @SerializedName("model") val model: String?,
+)

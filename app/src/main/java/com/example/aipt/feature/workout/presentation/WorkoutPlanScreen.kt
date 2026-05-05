@@ -45,7 +45,13 @@ fun WorkoutPlanRoute(
     viewModel: WorkoutPlanViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
-    WorkoutPlanScreen(state = state, onBackClick = onBackClick, onTrackProgressClick = onTrackProgressClick, onRetry = viewModel::retry)
+    WorkoutPlanScreen(
+        state = state,
+        onBackClick = onBackClick,
+        onTrackProgressClick = onTrackProgressClick,
+        onRetry = viewModel::retry,
+        onConfirmPlan = viewModel::confirmPlan,
+    )
 }
 
 @Composable
@@ -54,13 +60,14 @@ private fun WorkoutPlanScreen(
     onBackClick: () -> Unit,
     onTrackProgressClick: () -> Unit,
     onRetry: () -> Unit,
+    onConfirmPlan: () -> Unit,
 ) {
     Scaffold(containerColor = Color.Transparent) { padding ->
         AiptScreen(modifier = Modifier.padding(padding), contentPadding = PaddingValues(horizontal = 18.dp, vertical = 16.dp)) {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     TextButton(onClick = onBackClick) { Text("Back") }
-                    TextButton(onClick = onTrackProgressClick) { Text("Track progress") }
+                    TextButton(onClick = onTrackProgressClick, enabled = state.canTrackProgress) { Text("Track progress") }
                 }
                 Spacer(Modifier.height(8.dp))
                 when {
@@ -88,7 +95,23 @@ private fun WorkoutPlanScreen(
                             )
                         }
                         Spacer(Modifier.height(18.dp))
-                        Button(onClick = onTrackProgressClick, modifier = Modifier.fillMaxWidth().height(54.dp)) {
+                        Button(
+                            onClick = onConfirmPlan,
+                            enabled = state.canConfirmPlan,
+                            modifier = Modifier.fillMaxWidth().height(54.dp),
+                        ) {
+                            if (state.isSavingPlan) CircularProgressIndicator(color = Ink900) else Text("Confirm and save workout plan")
+                        }
+                        if (state.saveMessage != null) {
+                            Spacer(Modifier.height(8.dp))
+                            Text(state.saveMessage, color = Sea)
+                        }
+                        Spacer(Modifier.height(10.dp))
+                        Button(
+                            onClick = onTrackProgressClick,
+                            enabled = state.canTrackProgress,
+                            modifier = Modifier.fillMaxWidth().height(54.dp),
+                        ) {
                             Text("Track workout progress")
                         }
                         Spacer(Modifier.height(18.dp))
@@ -215,3 +238,5 @@ private fun BulletList(items: List<String>) {
         }
     }
 }
+
+
