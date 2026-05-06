@@ -21,6 +21,7 @@ import com.example.aipt.feature.profile.presentation.ProfileSetupViewModel
 import com.example.aipt.feature.profile.presentation.TrainingGoalRoute
 import com.example.aipt.feature.workout.presentation.ProgressTrackingRoute
 import com.example.aipt.feature.workout.presentation.WorkoutPlanRoute
+import com.example.aipt.feature.workout.presentation.WorkoutSessionRoute
 
 @Composable
 fun AppNavHost() {
@@ -104,7 +105,7 @@ fun AppNavHost() {
             TodayDashboardRoute(
                 onBackClick = { navController.navigate(Screen.MainMenu.route) { launchSingleTop = true } },
                 onCreatePlanClick = { navController.navigate(Screen.WorkoutPlan.route) },
-                onStartWorkoutClick = { navController.navigate(Screen.WorkoutProgress.route) },
+                onStartWorkoutClick = { navController.navigate(Screen.WorkoutSession.route) },
             )
         }
         composable(Screen.MainMenu.route) {
@@ -136,6 +137,17 @@ fun AppNavHost() {
         composable(Screen.WorkoutProgress.route) {
             ProgressTrackingRoute(onBackClick = navController::popBackStack)
         }
+        composable(Screen.WorkoutSession.route) {
+            WorkoutSessionRoute(
+                onBackClick = navController::popBackStack,
+                onFinishClick = {
+                    navController.navigate(Screen.TodayDashboard.route) {
+                        popUpTo(Screen.TodayDashboard.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
         composable(Screen.AiTrainerChat.route) {
             AiTrainerChatRoute(onBackClick = navController::popBackStack)
         }
@@ -147,3 +159,4 @@ fun AppNavHost() {
         }
     }
 }
+
