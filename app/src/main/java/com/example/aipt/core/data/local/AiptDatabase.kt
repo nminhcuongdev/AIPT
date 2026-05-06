@@ -2,6 +2,8 @@ package com.example.aipt.core.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.example.aipt.feature.dashboard.data.local.WorkoutSessionStateDao
+import com.example.aipt.feature.dashboard.data.local.WorkoutSessionStateEntity
 import com.example.aipt.feature.exercise.data.local.ExerciseDao
 import com.example.aipt.feature.exercise.data.local.ExerciseEntity
 import com.example.aipt.feature.profile.data.local.GymEquipmentDao
@@ -17,8 +19,9 @@ import com.example.aipt.feature.workout.data.local.WorkoutDayEntity
         UserProfileEntity::class,
         GymEquipmentEntity::class,
         WorkoutDayEntity::class,
+        WorkoutSessionStateEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = false,
 )
 abstract class AiptDatabase : RoomDatabase() {
@@ -26,4 +29,6 @@ abstract class AiptDatabase : RoomDatabase() {
     abstract fun userProfileDao(): UserProfileDao
     abstract fun gymEquipmentDao(): GymEquipmentDao
     abstract fun workoutDayDao(): WorkoutDayDao
+    abstract fun workoutSessionStateDao(): WorkoutSessionStateDao
 }
+

@@ -1,5 +1,7 @@
 package com.example.aipt.di
 
+import com.example.aipt.feature.dashboard.data.repository.WorkoutSessionRepositoryImpl
+import com.example.aipt.feature.dashboard.domain.repository.WorkoutSessionRepository
 import com.example.aipt.feature.exercise.data.repository.ExerciseRepositoryImpl
 import com.example.aipt.feature.exercise.domain.repository.ExerciseRepository
 import com.example.aipt.feature.profile.data.repository.ProfileRepositoryImpl
@@ -40,4 +42,10 @@ abstract class RepositoryModule {
     abstract fun bindWorkoutScheduleRepository(
         implementation: WorkoutScheduleRepositoryImpl,
     ): WorkoutScheduleRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWorkoutSessionRepository(
+        implementation: WorkoutSessionRepositoryImpl,
+    ): WorkoutSessionRepository
 }

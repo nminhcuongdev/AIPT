@@ -9,6 +9,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.aipt.feature.chat.presentation.AiTrainerChatRoute
+import com.example.aipt.feature.dashboard.presentation.TodayDashboardRoute
 import com.example.aipt.feature.exercise.presentation.detail.ExerciseDetailRoute
 import com.example.aipt.feature.exercise.presentation.list.ExerciseListRoute
 import com.example.aipt.feature.home.presentation.MainMenuRoute
@@ -38,7 +39,7 @@ fun AppNavHost() {
                     }
                 },
                 onProfileReady = {
-                    navController.navigate(Screen.MainMenu.route) {
+                    navController.navigate(Screen.TodayDashboard.route) {
                         popUpTo(Screen.Startup.route) { inclusive = true }
                         launchSingleTop = true
                     }
@@ -91,7 +92,7 @@ fun AppNavHost() {
                     viewModel = viewModel,
                     onBack = navController::popBackStack,
                     onFinish = {
-                        navController.navigate(Screen.MainMenu.route) {
+                        navController.navigate(Screen.TodayDashboard.route) {
                             popUpTo(Screen.ProfileFlow.route) { inclusive = true }
                             launchSingleTop = true
                         }
@@ -99,8 +100,16 @@ fun AppNavHost() {
                 )
             }
         }
+        composable(Screen.TodayDashboard.route) {
+            TodayDashboardRoute(
+                onBackClick = { navController.navigate(Screen.MainMenu.route) { launchSingleTop = true } },
+                onCreatePlanClick = { navController.navigate(Screen.WorkoutPlan.route) },
+                onStartWorkoutClick = { navController.navigate(Screen.WorkoutProgress.route) },
+            )
+        }
         composable(Screen.MainMenu.route) {
             MainMenuRoute(
+                onDashboardClick = { navController.navigate(Screen.TodayDashboard.route) },
                 onCreatePlanClick = { navController.navigate(Screen.WorkoutPlan.route) },
                 onTrackProgressClick = { navController.navigate(Screen.WorkoutProgress.route) },
                 onExerciseLibraryClick = { navController.navigate(Screen.ExerciseList.route) },

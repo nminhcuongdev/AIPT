@@ -26,6 +26,8 @@ class ProfileRepositoryImpl @Inject constructor(
     override suspend fun seedEquipmentIfNeeded() {
         if (gymEquipmentDao.count() == 0) {
             gymEquipmentDao.insertAll(GymEquipmentSeedData.equipment)
+        } else {
+            gymEquipmentDao.upsertAll(GymEquipmentSeedData.equipment)
         }
     }
 
@@ -41,3 +43,5 @@ class ProfileRepositoryImpl @Inject constructor(
         gymEquipmentDao.updateAllStatus(EquipmentStatus.Unknown.name)
     }
 }
+
+

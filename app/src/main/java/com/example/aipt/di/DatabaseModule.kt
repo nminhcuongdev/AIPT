@@ -3,6 +3,7 @@ package com.example.aipt.di
 import android.content.Context
 import androidx.room.Room
 import com.example.aipt.core.data.local.AiptDatabase
+import com.example.aipt.feature.dashboard.data.local.WorkoutSessionStateDao
 import com.example.aipt.feature.exercise.data.local.ExerciseDao
 import com.example.aipt.feature.profile.data.local.GymEquipmentDao
 import com.example.aipt.feature.profile.data.local.UserProfileDao
@@ -37,4 +38,8 @@ object DatabaseModule {
 
     @Provides
     fun provideWorkoutDayDao(database: AiptDatabase): WorkoutDayDao = database.workoutDayDao()
+
+    @Provides
+    fun provideWorkoutSessionStateDao(database: AiptDatabase): WorkoutSessionStateDao = database.workoutSessionStateDao()
 }
+

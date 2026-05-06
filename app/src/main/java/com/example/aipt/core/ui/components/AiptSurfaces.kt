@@ -22,9 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.aipt.ui.theme.Bone
-import com.example.aipt.ui.theme.Ember
+import com.example.aipt.ui.theme.CardDark
 import com.example.aipt.ui.theme.Ink900
-import com.example.aipt.ui.theme.Sea
 import com.example.aipt.ui.theme.Volt
 
 @Composable
@@ -57,7 +56,7 @@ fun AiptPanel(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 6.dp,
+        shadowElevation = 4.dp,
         tonalElevation = 1.dp,
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -74,32 +73,39 @@ fun AiptHeroHeader(
     modifier: Modifier = Modifier,
     trailing: @Composable (() -> Unit)? = null,
 ) {
-    Row(
+    Surface(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
+        shape = MaterialTheme.shapes.extraLarge,
+        color = CardDark,
+        shadowElevation = 8.dp,
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = eyebrow.uppercase(),
-                style = MaterialTheme.typography.labelLarge,
-                color = Ember,
-                fontWeight = FontWeight.Black,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineMedium,
-                color = Ink900,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (trailing != null) {
-            trailing()
+        Row(
+            modifier = Modifier.padding(horizontal = 22.dp, vertical = 24.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = eyebrow.uppercase(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Volt,
+                    fontWeight = FontWeight.Black,
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = Bone,
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Bone.copy(alpha = 0.76f),
+                )
+            }
+            if (trailing != null) {
+                trailing()
+            }
         }
     }
 }
@@ -139,10 +145,11 @@ fun AiptMetricRow(
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.large,
                 color = MaterialTheme.colorScheme.primary,
+                shadowElevation = 4.dp,
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     Text(value, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onPrimary)
-                    Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.82f))
+                    Text(label, style = MaterialTheme.typography.bodyMedium, color = Bone.copy(alpha = 0.78f))
                 }
             }
         }

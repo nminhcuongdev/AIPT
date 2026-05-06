@@ -10,7 +10,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -33,10 +36,12 @@ import com.example.aipt.core.ui.components.AiptPill
 import com.example.aipt.core.ui.components.AiptScreen
 import com.example.aipt.feature.workout.domain.model.NutritionGuidance
 import com.example.aipt.feature.workout.domain.model.WorkoutDay
+import com.example.aipt.ui.theme.Bone
 import com.example.aipt.ui.theme.Ember
 import com.example.aipt.ui.theme.Ink900
 import com.example.aipt.ui.theme.Sea
 import com.example.aipt.ui.theme.Volt
+import com.example.aipt.ui.theme.MintSoft
 
 @Composable
 fun WorkoutPlanRoute(
@@ -189,7 +194,12 @@ private fun WorkoutDayCard(day: WorkoutDay) {
         Text("Exercises", style = MaterialTheme.typography.titleMedium, color = Ink900)
         day.exercises.forEach { exercise ->
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                Text(exercise.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = Ink900)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    androidx.compose.material3.Surface(shape = MaterialTheme.shapes.medium, color = MintSoft) {
+                        Icon(Icons.Default.FitnessCenter, contentDescription = null, modifier = Modifier.padding(8.dp), tint = Ink900)
+                    }
+                    Text(exercise.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = Ink900)
+                }
                 val prescription = buildList {
                     exercise.sets?.let { add("$it sets") }
                     exercise.reps?.let { add("$it reps") }
@@ -238,5 +248,7 @@ private fun BulletList(items: List<String>) {
         }
     }
 }
+
+
 
 

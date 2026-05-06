@@ -25,10 +25,10 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = ActionBlue,
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFDBEAFE),
-    onPrimaryContainer = Color(0xFF0F2F6E),
+    primary = Ink900,
+    onPrimary = Volt,
+    primaryContainer = MintSoft,
+    onPrimaryContainer = Ink900,
     secondary = Sea,
     onSecondary = Color.White,
     secondaryContainer = Color(0xFFCCFBF1),
@@ -38,17 +38,17 @@ private val LightColorScheme = lightColorScheme(
     onBackground = Ink900,
     surface = CardLight,
     onSurface = Ink900,
-    surfaceContainer = Color(0xFFF1F5F9),
-    surfaceContainerHigh = Color(0xFFFFFFFF),
+    surfaceContainer = Color(0xFFF1F3EA),
+    surfaceContainerHigh = Color.White,
     onSurfaceVariant = Steel,
-    outline = Color(0xFFCBD5E1),
+    outline = Color(0xFFD8DDCF),
 )
 
 private val AiptShapes = Shapes(
     small = RoundedCornerShape(18.dp),
-    medium = RoundedCornerShape(24.dp),
-    large = RoundedCornerShape(32.dp),
-    extraLarge = RoundedCornerShape(42.dp),
+    medium = RoundedCornerShape(26.dp),
+    large = RoundedCornerShape(34.dp),
+    extraLarge = RoundedCornerShape(46.dp),
 )
 
 @Composable
