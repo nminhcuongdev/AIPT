@@ -5,5 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface WorkoutSessionRepository {
     fun observeSession(date: String): Flow<WorkoutSessionState?>
+    fun observeRecentSessions(limit: Int): Flow<List<WorkoutSessionState>>
     suspend fun saveSession(state: WorkoutSessionState)
 }

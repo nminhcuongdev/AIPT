@@ -1,6 +1,7 @@
 package com.example.aipt.di
 
 import com.example.aipt.core.network.ApiService
+import com.example.aipt.feature.chat.data.remote.AiTrainerChatApi
 import com.example.aipt.feature.workout.data.remote.WorkoutPlanApi
 import dagger.Module
 import dagger.Provides
@@ -41,4 +42,9 @@ object NetworkModule {
     @Singleton
     fun provideWorkoutPlanApi(retrofit: Retrofit): WorkoutPlanApi =
         retrofit.create(WorkoutPlanApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAiTrainerChatApi(retrofit: Retrofit): AiTrainerChatApi =
+        retrofit.create(AiTrainerChatApi::class.java)
 }
