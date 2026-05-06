@@ -8,8 +8,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.aipt.feature.chat.presentation.AiTrainerChatRoute
 import com.example.aipt.feature.exercise.presentation.detail.ExerciseDetailRoute
 import com.example.aipt.feature.exercise.presentation.list.ExerciseListRoute
+import com.example.aipt.feature.home.presentation.MainMenuRoute
 import com.example.aipt.feature.profile.presentation.BasicInfoRoute
 import com.example.aipt.feature.profile.presentation.GymEquipmentRoute
 import com.example.aipt.feature.profile.presentation.InBodyRoute
@@ -36,7 +38,7 @@ fun AppNavHost() {
                     }
                 },
                 onProfileReady = {
-                    navController.navigate(Screen.WorkoutPlan.route) {
+                    navController.navigate(Screen.MainMenu.route) {
                         popUpTo(Screen.Startup.route) { inclusive = true }
                         launchSingleTop = true
                     }
@@ -89,12 +91,22 @@ fun AppNavHost() {
                     viewModel = viewModel,
                     onBack = navController::popBackStack,
                     onFinish = {
-                        navController.navigate(Screen.WorkoutPlan.route) {
+                        navController.navigate(Screen.MainMenu.route) {
+                            popUpTo(Screen.ProfileFlow.route) { inclusive = true }
                             launchSingleTop = true
                         }
                     },
                 )
             }
+        }
+        composable(Screen.MainMenu.route) {
+            MainMenuRoute(
+                onCreatePlanClick = { navController.navigate(Screen.WorkoutPlan.route) },
+                onTrackProgressClick = { navController.navigate(Screen.WorkoutProgress.route) },
+                onExerciseLibraryClick = { navController.navigate(Screen.ExerciseList.route) },
+                onAiTrainerChatClick = { navController.navigate(Screen.AiTrainerChat.route) },
+                onProfileClick = { navController.navigate(Screen.ProfileFlow.route) },
+            )
         }
         composable(Screen.ExerciseList.route) {
             ExerciseListRoute(
@@ -114,6 +126,9 @@ fun AppNavHost() {
         }
         composable(Screen.WorkoutProgress.route) {
             ProgressTrackingRoute(onBackClick = navController::popBackStack)
+        }
+        composable(Screen.AiTrainerChat.route) {
+            AiTrainerChatRoute(onBackClick = navController::popBackStack)
         }
         composable(
             route = Screen.ExerciseDetail.route,

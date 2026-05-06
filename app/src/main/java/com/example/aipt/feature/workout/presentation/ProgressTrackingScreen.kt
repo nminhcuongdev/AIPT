@@ -11,7 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.MonitorWeight
+import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -216,6 +221,7 @@ private fun ExerciseTrackingRow(
             modifier = Modifier.fillMaxWidth(),
             minLines = 2,
             label = { Text("Note") },
+            leadingIcon = { Icon(Icons.Default.EditNote, contentDescription = null) },
         )
     }
 }
@@ -283,6 +289,7 @@ private fun NumberField(value: String, onValueChange: (String) -> Unit, label: S
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         label = { Text(label) },
+        leadingIcon = { Icon(Icons.Default.Numbers, contentDescription = null) },
     )
 }
 
@@ -295,5 +302,8 @@ private fun DecimalField(value: String, onValueChange: (String) -> Unit, label: 
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         label = { Text(label) },
+        leadingIcon = { Icon(Icons.Default.MonitorWeight, contentDescription = null) },
     )
 }
+
+

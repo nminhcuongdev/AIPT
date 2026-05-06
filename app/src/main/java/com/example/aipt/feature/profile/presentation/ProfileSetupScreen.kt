@@ -22,7 +22,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessibilityNew
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Height
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.MonitorWeight
+import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -134,7 +145,7 @@ private fun BasicInfoScreen(
                 )
                 Spacer(Modifier.height(22.dp))
                 AiptPanel {
-                    OutlinedTextField(state.name, onNameChanged, modifier = Modifier.fillMaxWidth(), singleLine = true, label = { Text("Your name") })
+                    OutlinedTextField(state.name, onNameChanged, modifier = Modifier.fillMaxWidth(), singleLine = true, label = { Text("Your name") }, leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) })
                     Spacer(Modifier.height(14.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         NumberField(state.age, onAgeChanged, "Age", Modifier.weight(1f))
@@ -288,6 +299,7 @@ private fun PreferencesScreen(
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 3,
                         label = { Text("Injuries or limitations") },
+                        leadingIcon = { Icon(Icons.Default.EditNote, contentDescription = null) },
                     )
                     Spacer(Modifier.height(16.dp))
                     Text("Preferred response language", style = MaterialTheme.typography.titleMedium, color = Ink900)
@@ -358,14 +370,31 @@ private fun NavButtons(onBack: () -> Unit, onNext: () -> Unit) {
 
 @Composable
 private fun NumberField(value: String, onValueChange: (String) -> Unit, label: String, modifier: Modifier = Modifier) {
-    OutlinedTextField(value = value, onValueChange = onValueChange, modifier = modifier, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), label = { Text(label) })
+    OutlinedTextField(value = value, onValueChange = onValueChange, modifier = modifier, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), label = { Text(label) }, leadingIcon = { Icon(numberFieldIcon(label), contentDescription = null) })
 }
 
 @Composable
 private fun DecimalField(value: String, onValueChange: (String) -> Unit, label: String, modifier: Modifier = Modifier) {
-    OutlinedTextField(value = value, onValueChange = onValueChange, modifier = modifier, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), label = { Text(label) })
+    OutlinedTextField(value = value, onValueChange = onValueChange, modifier = modifier, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), label = { Text(label) }, leadingIcon = { Icon(decimalFieldIcon(label), contentDescription = null) })
 }
 
+
+private fun numberFieldIcon(label: String) = when {
+    label.contains("Age", ignoreCase = true) -> Icons.Default.Person
+    label.contains("Height", ignoreCase = true) -> Icons.Default.Height
+    label.contains("Weight", ignoreCase = true) -> Icons.Default.MonitorWeight
+    label.contains("BMR", ignoreCase = true) -> Icons.Default.LocalFireDepartment
+    label.contains("Visceral", ignoreCase = true) -> Icons.Default.AccessibilityNew
+    else -> Icons.Default.Numbers
+}
+
+private fun decimalFieldIcon(label: String) = when {
+    label.contains("Water", ignoreCase = true) -> Icons.Default.WaterDrop
+    label.contains("arm", ignoreCase = true) || label.contains("leg", ignoreCase = true) || label.contains("Trunk", ignoreCase = true) -> Icons.Default.FitnessCenter
+    label.contains("SMM", ignoreCase = true) -> Icons.Default.FitnessCenter
+    label.contains("Body fat", ignoreCase = true) -> Icons.Default.MonitorWeight
+    else -> Icons.Default.Numbers
+}
 @Composable
 private fun EquipmentSwipeSection(state: ProfileSetupUiState, onEquipmentSwiped: (GymEquipment, Boolean) -> Unit) {
     val currentEquipment = state.currentEquipment
@@ -427,3 +456,6 @@ private fun SwipeEquipmentCard(equipment: GymEquipment, onSwipe: (Boolean) -> Un
         }
     }
 }
+
+
+

@@ -23,7 +23,7 @@ import javax.inject.Inject
 enum class StartupDestination {
     Loading,
     ProfileFlow,
-    WorkoutPlan,
+    MainMenu,
 }
 
 @HiltViewModel
@@ -32,7 +32,7 @@ class StartupViewModel @Inject constructor(
 ) : ViewModel() {
     val destination: StateFlow<StartupDestination> = profileRepository.observeProfile()
         .map { profile ->
-            if (profile == null) StartupDestination.ProfileFlow else StartupDestination.WorkoutPlan
+            if (profile == null) StartupDestination.ProfileFlow else StartupDestination.MainMenu
         }
         .stateIn(
             scope = viewModelScope,
@@ -52,7 +52,7 @@ fun StartupRoute(
     LaunchedEffect(destination) {
         when (destination) {
             StartupDestination.ProfileFlow -> onProfileMissing()
-            StartupDestination.WorkoutPlan -> onProfileReady()
+            StartupDestination.MainMenu -> onProfileReady()
             StartupDestination.Loading -> Unit
         }
     }

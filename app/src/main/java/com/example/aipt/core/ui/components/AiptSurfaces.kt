@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,8 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -39,26 +36,8 @@ fun AiptScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(Bone, Color(0xFFEAF5DD), Color(0xFFFFF7EA)),
-                ),
-            ),
+            .background(MaterialTheme.colorScheme.background),
     ) {
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(180.dp)
-                .clip(CircleShape)
-                .background(Volt.copy(alpha = 0.28f)),
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .size(220.dp)
-                .clip(CircleShape)
-                .background(Sea.copy(alpha = 0.12f)),
-        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -77,9 +56,9 @@ fun AiptPanel(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
-        shadowElevation = 10.dp,
-        tonalElevation = 2.dp,
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 6.dp,
+        tonalElevation = 1.dp,
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             content()
@@ -159,11 +138,11 @@ fun AiptMetricRow(
             Surface(
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.large,
-                color = Ink900,
+                color = MaterialTheme.colorScheme.primary,
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
-                    Text(value, style = MaterialTheme.typography.titleLarge, color = Volt)
-                    Text(label, style = MaterialTheme.typography.bodyMedium, color = Bone.copy(alpha = 0.78f))
+                    Text(value, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onPrimary)
+                    Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.82f))
                 }
             }
         }
