@@ -159,13 +159,10 @@ private fun CoachCard(onClick: () -> Unit) {
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("AI trainer chat", style = MaterialTheme.typography.titleLarge, color = Bone)
-                    AiptPill("Soon", containerColor = Volt, contentColor = Ink900)
-                }
+                Text("AI trainer chat", style = MaterialTheme.typography.titleLarge, color = Bone)
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    "Ask about form, recovery, nutrition, and plan changes when the chatbot API is ready.",
+                    "Ask about form, recovery, nutrition, and plan changes with your AI trainer.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Bone.copy(alpha = 0.72f),
                 )
@@ -208,5 +205,3 @@ private fun MainMenuAction(
         }
     }
 }
-
-
