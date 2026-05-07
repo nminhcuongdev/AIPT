@@ -1,4 +1,4 @@
-package com.example.aipt.feature.workout.presentation
+﻿package com.example.aipt.feature.workout.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,11 +7,15 @@ import com.example.aipt.feature.dashboard.domain.model.WorkoutSessionStatus
 import com.example.aipt.feature.dashboard.domain.usecase.SaveWorkoutSessionUseCase
 import com.example.aipt.feature.workout.domain.model.PlannedExercise
 import com.example.aipt.feature.workout.domain.model.WorkoutDay
+import com.example.aipt.feature.workout.domain.model.WorkoutProgressLog
+import com.example.aipt.feature.workout.domain.repository.WorkoutProgressRepository
 import com.example.aipt.feature.workout.domain.usecase.ObserveWorkoutScheduleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +24,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 data class WorkoutSessionExerciseUiState(
     val id: String,
@@ -29,10 +32,14 @@ data class WorkoutSessionExerciseUiState(
     val restSeconds: Int,
     val equipment: List<String>,
     val plannedNotes: String,
+    val plannedSets: Int?,
+    val sets: String = plannedSets?.toString().orEmpty(),
     val weightKg: String = "",
     val reps: String = "",
     val note: String = "",
-)
+) {
+    val hasLog: Boolean = weightKg.isNotBlank() || reps.isNotBlank() || note.isNotBlank()
+}
 
 data class WorkoutSessionUiState(
     val isLoading: Boolean = true,
@@ -57,6 +64,7 @@ data class WorkoutSessionUiState(
 class WorkoutSessionViewModel @Inject constructor(
     private val observeWorkoutSchedule: ObserveWorkoutScheduleUseCase,
     private val saveWorkoutSession: SaveWorkoutSessionUseCase,
+    private val workoutProgressRepository: WorkoutProgressRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(WorkoutSessionUiState())
     val uiState: StateFlow<WorkoutSessionUiState> = _uiState.asStateFlow()
@@ -82,6 +90,8 @@ class WorkoutSessionViewModel @Inject constructor(
     }
 
     fun onWeightKgChanged(value: String) = updateCurrentExercise { copy(weightKg = value.onlyDecimal().take(6)) }
+
+    fun onSetsChanged(value: String) = updateCurrentExercise { copy(sets = value.onlyDigits().take(3)) }
 
     fun onRepsChanged(value: String) = updateCurrentExercise { copy(reps = value.onlyDigits().take(3)) }
 
@@ -117,9 +127,20 @@ class WorkoutSessionViewModel @Inject constructor(
     }
 
     fun finishWorkout() {
-        val day = _uiState.value.day ?: return
+        val state = _uiState.value
+        val day = state.day ?: return
         restJob?.cancel()
         viewModelScope.launch {
+            val performedAt = System.currentTimeMillis()
+            workoutProgressRepository.saveLogs(
+                state.exercises.filter { it.hasLog }.map { exercise ->
+                    exercise.toProgressLog(
+                        performedAt = performedAt,
+                        day = day,
+                        dayTitle = state.title,
+                    )
+                },
+            )
             markStatus(day, WorkoutSessionStatus.Completed)
             _uiState.update { it.copy(isFinished = true, isResting = false, restRemainingSeconds = 0) }
         }
@@ -180,7 +201,36 @@ class WorkoutSessionViewModel @Inject constructor(
         restSeconds = restSeconds ?: 60,
         equipment = equipment,
         plannedNotes = notes,
+        plannedSets = sets,
     )
+
+    private fun WorkoutSessionExerciseUiState.toProgressLog(
+        performedAt: Long,
+        day: Int,
+        dayTitle: String,
+    ): WorkoutProgressLog {
+        val actualSets = sets.toIntOrNull() ?: plannedSets
+        val actualReps = reps.toIntOrNull()
+        val actualWeight = weightKg.toDoubleOrNull()
+        val volume = if (actualSets != null && actualReps != null && actualWeight != null) {
+            actualSets * actualReps * actualWeight
+        } else {
+            0.0
+        }
+        return WorkoutProgressLog(
+            performedAt = performedAt,
+            dateKey = todayDateKey(performedAt),
+            weekStartDate = weekStartDateKey(performedAt),
+            day = day,
+            dayTitle = dayTitle,
+            exerciseName = name,
+            sets = actualSets,
+            reps = actualReps,
+            weightKg = actualWeight,
+            volumeKg = volume,
+            notes = note,
+        )
+    }
 
     private fun String.onlyDigits(): String = filter { it.isDigit() }
 
@@ -196,4 +246,21 @@ class WorkoutSessionViewModel @Inject constructor(
     }
 }
 
-private fun todayDateKey(): String = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(System.currentTimeMillis())
+private fun todayDateKey(timeMillis: Long = System.currentTimeMillis()): String = WorkoutSessionDateKeyFormat.format(Date(timeMillis))
+
+private fun weekStartDateKey(timeMillis: Long): String {
+    val calendar = Calendar.getInstance().apply {
+        firstDayOfWeek = Calendar.MONDAY
+        timeInMillis = timeMillis
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+        val dayOffset = (get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + 7) % 7
+        add(Calendar.DAY_OF_MONTH, -dayOffset)
+    }
+    return WorkoutSessionDateKeyFormat.format(Date(calendar.timeInMillis))
+}
+
+private val WorkoutSessionDateKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+

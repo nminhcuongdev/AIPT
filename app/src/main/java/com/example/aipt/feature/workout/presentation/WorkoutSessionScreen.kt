@@ -1,4 +1,4 @@
-package com.example.aipt.feature.workout.presentation
+﻿package com.example.aipt.feature.workout.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -68,6 +68,7 @@ fun WorkoutSessionRoute(
         state = state,
         onBackClick = onBackClick,
         onWeightKgChanged = viewModel::onWeightKgChanged,
+        onSetsChanged = viewModel::onSetsChanged,
         onRepsChanged = viewModel::onRepsChanged,
         onNoteChanged = viewModel::onNoteChanged,
         onStartRest = viewModel::startRestTimer,
@@ -82,6 +83,7 @@ private fun WorkoutSessionScreen(
     state: WorkoutSessionUiState,
     onBackClick: () -> Unit,
     onWeightKgChanged: (String) -> Unit,
+    onSetsChanged: (String) -> Unit,
     onRepsChanged: (String) -> Unit,
     onNoteChanged: (String) -> Unit,
     onStartRest: () -> Unit,
@@ -100,6 +102,7 @@ private fun WorkoutSessionScreen(
                     else -> ActiveSessionContent(
                         state = state,
                         onWeightKgChanged = onWeightKgChanged,
+                        onSetsChanged = onSetsChanged,
                         onRepsChanged = onRepsChanged,
                         onNoteChanged = onNoteChanged,
                         onStartRest = onStartRest,
@@ -137,6 +140,7 @@ private fun MissingSessionPlanPanel() {
 private fun ActiveSessionContent(
     state: WorkoutSessionUiState,
     onWeightKgChanged: (String) -> Unit,
+    onSetsChanged: (String) -> Unit,
     onRepsChanged: (String) -> Unit,
     onNoteChanged: (String) -> Unit,
     onStartRest: () -> Unit,
@@ -166,6 +170,7 @@ private fun ActiveSessionContent(
         isResting = state.isResting,
         restRemainingSeconds = state.restRemainingSeconds,
         onWeightKgChanged = onWeightKgChanged,
+        onSetsChanged = onSetsChanged,
         onRepsChanged = onRepsChanged,
         onNoteChanged = onNoteChanged,
         onStartRest = onStartRest,
@@ -207,6 +212,7 @@ private fun CurrentExercisePanel(
     isResting: Boolean,
     restRemainingSeconds: Int,
     onWeightKgChanged: (String) -> Unit,
+    onSetsChanged: (String) -> Unit,
     onRepsChanged: (String) -> Unit,
     onNoteChanged: (String) -> Unit,
     onStartRest: () -> Unit,
@@ -233,11 +239,18 @@ private fun CurrentExercisePanel(
             Text(exercise.plannedNotes, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Spacer(Modifier.height(16.dp))
+        DecimalSessionField(
+            value = exercise.weightKg,
+            onValueChange = onWeightKgChanged,
+            label = "Weight kg",
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            DecimalSessionField(
-                value = exercise.weightKg,
-                onValueChange = onWeightKgChanged,
-                label = "Weight kg",
+            NumberSessionField(
+                value = exercise.sets,
+                onValueChange = onSetsChanged,
+                label = "Sets",
                 modifier = Modifier.weight(1f),
             )
             NumberSessionField(
@@ -363,5 +376,8 @@ private fun formatTime(seconds: Int): String {
     val remainder = seconds % 60
     return "%d:%02d".format(minutes, remainder)
 }
+
+
+
 
 

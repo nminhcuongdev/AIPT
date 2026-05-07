@@ -1,4 +1,4 @@
-package com.example.aipt.feature.dashboard.presentation
+﻿package com.example.aipt.feature.dashboard.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -53,12 +53,14 @@ fun TodayDashboardRoute(
     onBackClick: () -> Unit,
     onCreatePlanClick: () -> Unit,
     onStartWorkoutClick: () -> Unit,
+    onProfileClick: () -> Unit,
     viewModel: TodayDashboardViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
     TodayDashboardScreen(
         state = state,
         onBackClick = onBackClick,
+        onProfileClick = onProfileClick,
         onCreatePlanClick = onCreatePlanClick,
         onStartWorkoutClick = {
             viewModel.startWorkout()
@@ -72,6 +74,7 @@ fun TodayDashboardRoute(
 private fun TodayDashboardScreen(
     state: TodayDashboardUiState,
     onBackClick: () -> Unit,
+    onProfileClick: () -> Unit,
     onCreatePlanClick: () -> Unit,
     onStartWorkoutClick: () -> Unit,
     onCompleteWorkoutClick: () -> Unit,
@@ -79,7 +82,10 @@ private fun TodayDashboardScreen(
     Scaffold(containerColor = Color.Transparent) { padding ->
         AiptScreen(modifier = Modifier.padding(padding), contentPadding = PaddingValues(horizontal = 18.dp, vertical = 16.dp)) {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                TextButton(onClick = onBackClick) { Text("Back") }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = onBackClick) { Text("Back") }
+                    TextButton(onClick = onProfileClick) { Text("Profile") }
+                }
                 Spacer(Modifier.height(8.dp))
                 when {
                     state.isLoading -> LoadingDashboard()
@@ -258,3 +264,4 @@ private fun TargetChip(icon: androidx.compose.ui.graphics.vector.ImageVector, te
         }
     }
 }
+

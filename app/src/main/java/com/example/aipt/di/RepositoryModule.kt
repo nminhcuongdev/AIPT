@@ -1,4 +1,4 @@
-package com.example.aipt.di
+﻿package com.example.aipt.di
 
 import com.example.aipt.feature.chat.data.repository.AiTrainerChatRepositoryImpl
 import com.example.aipt.feature.chat.domain.repository.AiTrainerChatRepository
@@ -8,8 +8,10 @@ import com.example.aipt.feature.exercise.data.repository.ExerciseRepositoryImpl
 import com.example.aipt.feature.exercise.domain.repository.ExerciseRepository
 import com.example.aipt.feature.profile.data.repository.ProfileRepositoryImpl
 import com.example.aipt.feature.profile.domain.repository.ProfileRepository
+import com.example.aipt.feature.workout.data.repository.WorkoutProgressRepositoryImpl
 import com.example.aipt.feature.workout.data.repository.WorkoutRepositoryImpl
 import com.example.aipt.feature.workout.data.repository.WorkoutScheduleRepositoryImpl
+import com.example.aipt.feature.workout.domain.repository.WorkoutProgressRepository
 import com.example.aipt.feature.workout.domain.repository.WorkoutRepository
 import com.example.aipt.feature.workout.domain.repository.WorkoutScheduleRepository
 import dagger.Binds
@@ -44,6 +46,12 @@ abstract class RepositoryModule {
     abstract fun bindWorkoutScheduleRepository(
         implementation: WorkoutScheduleRepositoryImpl,
     ): WorkoutScheduleRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWorkoutProgressRepository(
+        implementation: WorkoutProgressRepositoryImpl,
+    ): WorkoutProgressRepository
 
     @Binds
     @Singleton

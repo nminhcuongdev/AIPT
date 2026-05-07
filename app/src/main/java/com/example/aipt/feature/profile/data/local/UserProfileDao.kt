@@ -1,4 +1,4 @@
-package com.example.aipt.feature.profile.data.local
+﻿package com.example.aipt.feature.profile.data.local
 
 import androidx.room.Dao
 import androidx.room.Query
@@ -12,4 +12,7 @@ interface UserProfileDao {
 
     @Upsert
     suspend fun saveProfile(profile: UserProfileEntity)
+
+    @Query("DELETE FROM user_profiles WHERE id = 1")
+    suspend fun deleteProfile()
 }

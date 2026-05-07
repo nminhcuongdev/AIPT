@@ -1,4 +1,4 @@
-package com.example.aipt.feature.profile.presentation
+﻿package com.example.aipt.feature.profile.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,30 +7,30 @@ import com.example.aipt.feature.profile.domain.model.GymEquipment
 import com.example.aipt.feature.profile.domain.model.UserProfile
 import com.example.aipt.feature.profile.domain.repository.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 data class ProfileSetupUiState(
     val name: String = "",
     val age: String = "",
     val heightCm: String = "",
     val weightKg: String = "",
-    val bodyFatPercent: String = "18.9",
-    val skeletalMuscleMassKg: String = "28.5",
-    val bodyWaterLiters: String = "37",
-    val visceralFatLevel: String = "4",
-    val basalMetabolicRateKcal: String = "1460",
-    val waistHipRatio: String = "0.80",
-    val leftArmMuscleKg: String = "2.62",
-    val rightArmMuscleKg: String = "2.59",
-    val trunkMuscleKg: String = "22.1",
-    val leftLegMuscleKg: String = "8.19",
-    val rightLegMuscleKg: String = "7.89",
+    val bodyFatPercent: String = "",
+    val skeletalMuscleMassKg: String = "",
+    val bodyWaterLiters: String = "",
+    val visceralFatLevel: String = "",
+    val basalMetabolicRateKcal: String = "",
+    val waistHipRatio: String = "",
+    val leftArmMuscleKg: String = "",
+    val rightArmMuscleKg: String = "",
+    val trunkMuscleKg: String = "",
+    val leftLegMuscleKg: String = "",
+    val rightLegMuscleKg: String = "",
     val selectedGoal: String = TrainingGoals.first().label,
     val daysPerWeek: String = "5",
     val sessionDurationMinutes: String = "60",
@@ -38,6 +38,7 @@ data class ProfileSetupUiState(
     val injuriesOrLimitations: String = "None",
     val preferredLanguage: String = PreferredLanguages.first().code,
     val equipment: List<GymEquipment> = emptyList(),
+    val hasProfile: Boolean = false,
     val saved: Boolean = false,
 ) {
     val currentEquipment: GymEquipment? = equipment.firstOrNull { it.status == EquipmentStatus.Unknown }
@@ -72,23 +73,24 @@ class ProfileSetupViewModel @Inject constructor(
     private val age = MutableStateFlow("")
     private val heightCm = MutableStateFlow("")
     private val weightKg = MutableStateFlow("")
-    private val bodyFatPercent = MutableStateFlow("18.9")
-    private val skeletalMuscleMassKg = MutableStateFlow("28.5")
-    private val bodyWaterLiters = MutableStateFlow("37")
-    private val visceralFatLevel = MutableStateFlow("4")
-    private val basalMetabolicRateKcal = MutableStateFlow("1460")
-    private val waistHipRatio = MutableStateFlow("0.80")
-    private val leftArmMuscleKg = MutableStateFlow("2.62")
-    private val rightArmMuscleKg = MutableStateFlow("2.59")
-    private val trunkMuscleKg = MutableStateFlow("22.1")
-    private val leftLegMuscleKg = MutableStateFlow("8.19")
-    private val rightLegMuscleKg = MutableStateFlow("7.89")
+    private val bodyFatPercent = MutableStateFlow("")
+    private val skeletalMuscleMassKg = MutableStateFlow("")
+    private val bodyWaterLiters = MutableStateFlow("")
+    private val visceralFatLevel = MutableStateFlow("")
+    private val basalMetabolicRateKcal = MutableStateFlow("")
+    private val waistHipRatio = MutableStateFlow("")
+    private val leftArmMuscleKg = MutableStateFlow("")
+    private val rightArmMuscleKg = MutableStateFlow("")
+    private val trunkMuscleKg = MutableStateFlow("")
+    private val leftLegMuscleKg = MutableStateFlow("")
+    private val rightLegMuscleKg = MutableStateFlow("")
     private val selectedGoal = MutableStateFlow(TrainingGoals.first().label)
     private val daysPerWeek = MutableStateFlow("5")
     private val sessionDurationMinutes = MutableStateFlow("60")
     private val experienceLevel = MutableStateFlow(ExperienceLevels[1])
     private val injuriesOrLimitations = MutableStateFlow("None")
     private val preferredLanguage = MutableStateFlow(PreferredLanguages.first().code)
+    private val hasProfile = MutableStateFlow(false)
     private val saved = MutableStateFlow(false)
 
     val uiState: StateFlow<ProfileSetupUiState> = combine(
@@ -114,6 +116,7 @@ class ProfileSetupViewModel @Inject constructor(
         injuriesOrLimitations,
         preferredLanguage,
         repository.observeEquipment(),
+        hasProfile,
         saved,
     ) { values ->
         @Suppress("UNCHECKED_CAST")
@@ -140,7 +143,8 @@ class ProfileSetupViewModel @Inject constructor(
             injuriesOrLimitations = values[19] as String,
             preferredLanguage = values[20] as String,
             equipment = values[21] as List<GymEquipment>,
-            saved = values[22] as Boolean,
+            hasProfile = values[22] as Boolean,
+            saved = values[23] as Boolean,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -150,6 +154,17 @@ class ProfileSetupViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { repository.seedEquipmentIfNeeded() }
+        viewModelScope.launch {
+            repository.observeProfile().collect { profile ->
+                hasProfile.value = profile != null
+                if (profile == null) {
+                    clearForm()
+                } else {
+                    populateFromProfile(profile)
+                    saved.value = true
+                }
+            }
+        }
     }
 
     fun onNameChanged(value: String) { name.value = value; saved.value = false }
@@ -191,6 +206,23 @@ class ProfileSetupViewModel @Inject constructor(
         saved.value = false
     }
 
+    fun onCreateNewProfile() {
+        clearForm()
+        hasProfile.value = false
+        saved.value = false
+        viewModelScope.launch { repository.resetEquipmentChoices() }
+    }
+
+    fun onDeleteProfile() {
+        viewModelScope.launch {
+            repository.deleteProfile()
+            repository.resetEquipmentChoices()
+            clearForm()
+            hasProfile.value = false
+            saved.value = false
+        }
+    }
+
     fun onSaveProfile() {
         val profile = UserProfile(
             name = name.value.trim(),
@@ -218,11 +250,64 @@ class ProfileSetupViewModel @Inject constructor(
         if (profile.name.isBlank()) return
         viewModelScope.launch {
             repository.saveProfile(profile)
+            hasProfile.value = true
             saved.value = true
         }
     }
 
+    private fun populateFromProfile(profile: UserProfile) {
+        name.value = profile.name
+        age.value = profile.age?.toString().orEmpty()
+        heightCm.value = profile.heightCm?.toString().orEmpty()
+        weightKg.value = profile.weightKg?.toString().orEmpty()
+        bodyFatPercent.value = profile.bodyFatPercent?.display().orEmpty()
+        skeletalMuscleMassKg.value = profile.skeletalMuscleMassKg?.display().orEmpty()
+        bodyWaterLiters.value = profile.bodyWaterLiters?.display().orEmpty()
+        visceralFatLevel.value = profile.visceralFatLevel?.toString().orEmpty()
+        basalMetabolicRateKcal.value = profile.basalMetabolicRateKcal?.toString().orEmpty()
+        waistHipRatio.value = profile.waistHipRatio?.display().orEmpty()
+        leftArmMuscleKg.value = profile.leftArmMuscleKg?.display().orEmpty()
+        rightArmMuscleKg.value = profile.rightArmMuscleKg?.display().orEmpty()
+        trunkMuscleKg.value = profile.trunkMuscleKg?.display().orEmpty()
+        leftLegMuscleKg.value = profile.leftLegMuscleKg?.display().orEmpty()
+        rightLegMuscleKg.value = profile.rightLegMuscleKg?.display().orEmpty()
+        selectedGoal.value = profile.trainingGoal.toGoalLabel()
+        daysPerWeek.value = profile.daysPerWeek?.toString() ?: "5"
+        sessionDurationMinutes.value = profile.sessionDurationMinutes?.toString() ?: "60"
+        experienceLevel.value = profile.experienceLevel.takeIf { it in ExperienceLevels } ?: ExperienceLevels[1]
+        injuriesOrLimitations.value = profile.injuriesOrLimitations.ifBlank { "None" }
+        preferredLanguage.value = profile.preferredLanguage.takeIf { code -> PreferredLanguages.any { it.code == code } } ?: PreferredLanguages.first().code
+    }
+
+    private fun clearForm() {
+        name.value = ""
+        age.value = ""
+        heightCm.value = ""
+        weightKg.value = ""
+        bodyFatPercent.value = ""
+        skeletalMuscleMassKg.value = ""
+        bodyWaterLiters.value = ""
+        visceralFatLevel.value = ""
+        basalMetabolicRateKcal.value = ""
+        waistHipRatio.value = ""
+        leftArmMuscleKg.value = ""
+        rightArmMuscleKg.value = ""
+        trunkMuscleKg.value = ""
+        leftLegMuscleKg.value = ""
+        rightLegMuscleKg.value = ""
+        selectedGoal.value = TrainingGoals.first().label
+        daysPerWeek.value = "5"
+        sessionDurationMinutes.value = "60"
+        experienceLevel.value = ExperienceLevels[1]
+        injuriesOrLimitations.value = "None"
+        preferredLanguage.value = PreferredLanguages.first().code
+    }
+
     private fun String.toGoalApiValue(): String = TrainingGoals.firstOrNull { it.label == this }?.apiValue ?: this
+
+    private fun String.toGoalLabel(): String = TrainingGoals.firstOrNull { it.apiValue == this }?.label ?: this
+
+    private fun Double.display(): String = if (this % 1.0 == 0.0) toInt().toString() else toString()
 
     private fun updateDecimal(target: MutableStateFlow<String>, value: String, maxLength: Int) {
         target.value = value.onlyDecimal().take(maxLength)

@@ -1,9 +1,10 @@
-package com.example.aipt.core.navigation
+﻿package com.example.aipt.core.navigation
 
 sealed class Screen(val route: String) {
     data object Startup : Screen("startup")
     data object MainMenu : Screen("main_menu")
     data object TodayDashboard : Screen("today_dashboard")
+    data object ProfileManager : Screen("profile_manager")
     data object ProfileFlow : Screen("profile_flow")
     data object BasicInfo : Screen("profile_basic_info")
     data object InBody : Screen("profile_inbody")
@@ -19,6 +20,3 @@ sealed class Screen(val route: String) {
     data object WorkoutSession : Screen("workout_session")
     data object AiTrainerChat : Screen("ai_trainer_chat")
 }
-
-
-

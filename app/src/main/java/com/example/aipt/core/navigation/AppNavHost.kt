@@ -1,4 +1,4 @@
-package com.example.aipt.core.navigation
+﻿package com.example.aipt.core.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -17,6 +17,7 @@ import com.example.aipt.feature.profile.presentation.BasicInfoRoute
 import com.example.aipt.feature.profile.presentation.GymEquipmentRoute
 import com.example.aipt.feature.profile.presentation.InBodyRoute
 import com.example.aipt.feature.profile.presentation.PreferencesRoute
+import com.example.aipt.feature.profile.presentation.ProfileManagerRoute
 import com.example.aipt.feature.profile.presentation.ProfileSetupViewModel
 import com.example.aipt.feature.profile.presentation.TrainingGoalRoute
 import com.example.aipt.feature.workout.presentation.ProgressTrackingRoute
@@ -93,8 +94,7 @@ fun AppNavHost() {
                     viewModel = viewModel,
                     onBack = navController::popBackStack,
                     onFinish = {
-                        navController.navigate(Screen.TodayDashboard.route) {
-                            popUpTo(Screen.ProfileFlow.route) { inclusive = true }
+                        navController.navigate(Screen.WorkoutPlan.route) {
                             launchSingleTop = true
                         }
                     },
@@ -106,6 +106,15 @@ fun AppNavHost() {
                 onBackClick = { navController.navigate(Screen.MainMenu.route) { launchSingleTop = true } },
                 onCreatePlanClick = { navController.navigate(Screen.WorkoutPlan.route) },
                 onStartWorkoutClick = { navController.navigate(Screen.WorkoutSession.route) },
+                onProfileClick = { navController.navigate(Screen.ProfileManager.route) },
+            )
+        }
+        composable(Screen.ProfileManager.route) {
+            ProfileManagerRoute(
+                onBack = navController::popBackStack,
+                onEditProfile = { navController.navigate(Screen.ProfileFlow.route) },
+                onCreateProfile = { navController.navigate(Screen.ProfileFlow.route) },
+                onCreateWorkoutPlan = { navController.navigate(Screen.WorkoutPlan.route) },
             )
         }
         composable(Screen.MainMenu.route) {
@@ -115,12 +124,12 @@ fun AppNavHost() {
                 onTrackProgressClick = { navController.navigate(Screen.WorkoutProgress.route) },
                 onExerciseLibraryClick = { navController.navigate(Screen.ExerciseList.route) },
                 onAiTrainerChatClick = { navController.navigate(Screen.AiTrainerChat.route) },
-                onProfileClick = { navController.navigate(Screen.ProfileFlow.route) },
+                onProfileClick = { navController.navigate(Screen.ProfileManager.route) },
             )
         }
         composable(Screen.ExerciseList.route) {
             ExerciseListRoute(
-                onProfileClick = { navController.navigate(Screen.ProfileFlow.route) },
+                onProfileClick = { navController.navigate(Screen.ProfileManager.route) },
                 onWorkoutPlanClick = { navController.navigate(Screen.WorkoutPlan.route) },
                 onProgressClick = { navController.navigate(Screen.WorkoutProgress.route) },
                 onExerciseClick = { exerciseId ->
@@ -159,4 +168,6 @@ fun AppNavHost() {
         }
     }
 }
+
+
 
