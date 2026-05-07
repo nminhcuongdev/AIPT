@@ -53,7 +53,7 @@ AIPT is an Android AI personal trainer app built with Kotlin and Jetpack Compose
 The app currently points Retrofit to:
 
 ```kotlin
-http://10.84.30.20:8000/
+https://github.com/nminhcuongdev/workoutplannerAPI
 ```
 
 Configured endpoints:
