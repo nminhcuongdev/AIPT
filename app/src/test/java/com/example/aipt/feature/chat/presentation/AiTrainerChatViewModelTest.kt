@@ -4,6 +4,7 @@ import com.example.aipt.feature.chat.domain.model.AiTrainerChatRequest
 import com.example.aipt.feature.chat.domain.model.AiTrainerChatResponse
 import com.example.aipt.feature.chat.domain.model.AiTrainerSuggestedAction
 import com.example.aipt.feature.chat.domain.repository.AiTrainerChatRepository
+import com.example.aipt.feature.chat.domain.usecase.BuildAiTrainerChatRequestUseCase
 import com.example.aipt.feature.chat.domain.usecase.SendAiTrainerChatUseCase
 import com.example.aipt.feature.dashboard.domain.model.WorkoutSessionState
 import com.example.aipt.feature.dashboard.domain.model.WorkoutSessionStatus
@@ -14,6 +15,8 @@ import com.example.aipt.feature.profile.domain.model.EquipmentStatus
 import com.example.aipt.feature.profile.domain.model.GymEquipment
 import com.example.aipt.feature.profile.domain.model.UserProfile
 import com.example.aipt.feature.profile.domain.repository.ProfileRepository
+import com.example.aipt.feature.profile.domain.usecase.ObserveEquipmentUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveProfileUseCase
 import com.example.aipt.feature.workout.domain.model.PlannedExercise
 import com.example.aipt.feature.workout.domain.model.WorkoutDay
 import com.example.aipt.feature.workout.domain.repository.WorkoutScheduleRepository
@@ -143,9 +146,12 @@ class AiTrainerChatViewModelTest {
         coEvery { sessionRepository.saveSession(any()) } returns Unit
 
         return AiTrainerChatViewModel(
-            profileRepository = profileRepository,
-            observeWorkoutSchedule = ObserveWorkoutScheduleUseCase(scheduleRepository),
-            observeRecentWorkoutSessions = ObserveRecentWorkoutSessionsUseCase(sessionRepository),
+            buildChatRequest = BuildAiTrainerChatRequestUseCase(
+                observeProfile = ObserveProfileUseCase(profileRepository),
+                observeEquipment = ObserveEquipmentUseCase(profileRepository),
+                observeWorkoutSchedule = ObserveWorkoutScheduleUseCase(scheduleRepository),
+                observeRecentWorkoutSessions = ObserveRecentWorkoutSessionsUseCase(sessionRepository),
+            ),
             sendAiTrainerChat = SendAiTrainerChatUseCase(chatRepository),
         )
     }

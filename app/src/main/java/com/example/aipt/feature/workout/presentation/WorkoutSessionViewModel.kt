@@ -1,4 +1,4 @@
-﻿package com.example.aipt.feature.workout.presentation
+package com.example.aipt.feature.workout.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,8 +8,8 @@ import com.example.aipt.feature.dashboard.domain.usecase.SaveWorkoutSessionUseCa
 import com.example.aipt.feature.workout.domain.model.PlannedExercise
 import com.example.aipt.feature.workout.domain.model.WorkoutDay
 import com.example.aipt.feature.workout.domain.model.WorkoutProgressLog
-import com.example.aipt.feature.workout.domain.repository.WorkoutProgressRepository
 import com.example.aipt.feature.workout.domain.usecase.ObserveWorkoutScheduleUseCase
+import com.example.aipt.feature.workout.domain.usecase.SaveWorkoutProgressLogsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -64,7 +64,7 @@ data class WorkoutSessionUiState(
 class WorkoutSessionViewModel @Inject constructor(
     private val observeWorkoutSchedule: ObserveWorkoutScheduleUseCase,
     private val saveWorkoutSession: SaveWorkoutSessionUseCase,
-    private val workoutProgressRepository: WorkoutProgressRepository,
+    private val saveWorkoutProgressLogs: SaveWorkoutProgressLogsUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(WorkoutSessionUiState())
     val uiState: StateFlow<WorkoutSessionUiState> = _uiState.asStateFlow()
@@ -132,7 +132,7 @@ class WorkoutSessionViewModel @Inject constructor(
         restJob?.cancel()
         viewModelScope.launch {
             val performedAt = System.currentTimeMillis()
-            workoutProgressRepository.saveLogs(
+            saveWorkoutProgressLogs(
                 state.exercises.filter { it.hasLog }.map { exercise ->
                     exercise.toProgressLog(
                         performedAt = performedAt,
@@ -263,4 +263,3 @@ private fun weekStartDateKey(timeMillis: Long): String {
 }
 
 private val WorkoutSessionDateKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-

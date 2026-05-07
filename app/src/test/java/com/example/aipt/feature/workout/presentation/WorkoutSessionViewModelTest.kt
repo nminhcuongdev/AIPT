@@ -10,6 +10,7 @@ import com.example.aipt.feature.workout.domain.model.WorkoutProgressLog
 import com.example.aipt.feature.workout.domain.repository.WorkoutProgressRepository
 import com.example.aipt.feature.workout.domain.repository.WorkoutScheduleRepository
 import com.example.aipt.feature.workout.domain.usecase.ObserveWorkoutScheduleUseCase
+import com.example.aipt.feature.workout.domain.usecase.SaveWorkoutProgressLogsUseCase
 import com.example.aipt.testutil.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -156,7 +157,7 @@ class WorkoutSessionViewModelTest {
     ): WorkoutSessionViewModel = WorkoutSessionViewModel(
         observeWorkoutSchedule = ObserveWorkoutScheduleUseCase(scheduleRepository),
         saveWorkoutSession = SaveWorkoutSessionUseCase(sessionRepository),
-        workoutProgressRepository = progressRepository,
+        saveWorkoutProgressLogs = SaveWorkoutProgressLogsUseCase(progressRepository),
     )
 
     private fun mockScheduleRepository(days: MutableStateFlow<List<WorkoutDay>>): WorkoutScheduleRepository {

@@ -2,14 +2,16 @@ package com.example.aipt.feature.workout.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.aipt.feature.exercise.domain.repository.ExerciseRepository
-import com.example.aipt.feature.profile.domain.repository.ProfileRepository
 import com.example.aipt.feature.workout.domain.WorkoutPlanGenerator
 import com.example.aipt.feature.workout.domain.model.WorkoutPlanRequest
 import com.example.aipt.feature.workout.domain.model.WorkoutPlanResponse
-import com.example.aipt.feature.workout.domain.repository.WorkoutPlanSessionRepository
+import com.example.aipt.feature.exercise.domain.usecase.ObserveExercisesUseCase
+import com.example.aipt.feature.exercise.domain.usecase.SeedExercisesUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveEquipmentUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveProfileUseCase
 import com.example.aipt.feature.workout.domain.usecase.CreateWorkoutPlanUseCase
 import com.example.aipt.feature.workout.domain.usecase.SaveWorkoutScheduleUseCase
+import com.example.aipt.feature.workout.domain.usecase.SetLatestWorkoutPlanUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,12 +39,14 @@ data class WorkoutPlanUiState(
 
 @HiltViewModel
 class WorkoutPlanViewModel @Inject constructor(
-    profileRepository: ProfileRepository,
-    exerciseRepository: ExerciseRepository,
+    private val observeProfile: ObserveProfileUseCase,
+    private val observeEquipment: ObserveEquipmentUseCase,
+    private val observeExercises: ObserveExercisesUseCase,
+    private val seedExercises: SeedExercisesUseCase,
     private val generator: WorkoutPlanGenerator,
     private val createWorkoutPlan: CreateWorkoutPlanUseCase,
     private val saveWorkoutSchedule: SaveWorkoutScheduleUseCase,
-    private val planSessionRepository: WorkoutPlanSessionRepository,
+    private val setLatestWorkoutPlan: SetLatestWorkoutPlanUseCase,
 ) : ViewModel() {
     private val remoteState = MutableStateFlow(WorkoutPlanUiState(isLoading = true))
     private var requestJob: Job? = null
@@ -54,12 +58,12 @@ class WorkoutPlanViewModel @Inject constructor(
     )
 
     init {
-        viewModelScope.launch { exerciseRepository.seedIfNeeded() }
+        viewModelScope.launch { seedExercises() }
         viewModelScope.launch {
             combine(
-                profileRepository.observeProfile(),
-                profileRepository.observeEquipment(),
-                exerciseRepository.observeExercises(),
+                observeProfile(),
+                observeEquipment(),
+                observeExercises(),
             ) { profile, equipment, _ ->
                 if (profile == null) null else generator.buildRequest(profile, equipment)
             }.collect { request ->
@@ -83,7 +87,7 @@ class WorkoutPlanViewModel @Inject constructor(
             remoteState.update { it.copy(isSavingPlan = true, errorMessage = null, saveMessage = null) }
             runCatching { saveWorkoutSchedule(response.plan.weeklySchedule) }
                 .onSuccess {
-                    planSessionRepository.setLatestPlan(response)
+                    setLatestWorkoutPlan.invoke(response)
                     remoteState.update {
                         it.copy(
                             isSavingPlan = false,

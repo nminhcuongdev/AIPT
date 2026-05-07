@@ -1,11 +1,17 @@
-﻿package com.example.aipt.feature.profile.presentation
+package com.example.aipt.feature.profile.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aipt.feature.profile.domain.model.EquipmentStatus
 import com.example.aipt.feature.profile.domain.model.GymEquipment
 import com.example.aipt.feature.profile.domain.model.UserProfile
-import com.example.aipt.feature.profile.domain.repository.ProfileRepository
+import com.example.aipt.feature.profile.domain.usecase.DeleteProfileUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveEquipmentUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveProfileUseCase
+import com.example.aipt.feature.profile.domain.usecase.ResetEquipmentChoicesUseCase
+import com.example.aipt.feature.profile.domain.usecase.SaveProfileUseCase
+import com.example.aipt.feature.profile.domain.usecase.SeedEquipmentUseCase
+import com.example.aipt.feature.profile.domain.usecase.SetEquipmentStatusUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,7 +73,13 @@ val PreferredLanguages = listOf(
 
 @HiltViewModel
 class ProfileSetupViewModel @Inject constructor(
-    private val repository: ProfileRepository,
+    private val observeProfile: ObserveProfileUseCase,
+    private val observeEquipment: ObserveEquipmentUseCase,
+    private val seedEquipment: SeedEquipmentUseCase,
+    private val saveProfile: SaveProfileUseCase,
+    private val deleteProfile: DeleteProfileUseCase,
+    private val resetEquipmentChoices: ResetEquipmentChoicesUseCase,
+    private val setEquipmentStatus: SetEquipmentStatusUseCase,
 ) : ViewModel() {
     private val name = MutableStateFlow("")
     private val age = MutableStateFlow("")
@@ -115,7 +127,7 @@ class ProfileSetupViewModel @Inject constructor(
         experienceLevel,
         injuriesOrLimitations,
         preferredLanguage,
-        repository.observeEquipment(),
+        observeEquipment(),
         hasProfile,
         saved,
     ) { values ->
@@ -153,9 +165,9 @@ class ProfileSetupViewModel @Inject constructor(
     )
 
     init {
-        viewModelScope.launch { repository.seedEquipmentIfNeeded() }
+        viewModelScope.launch { seedEquipment() }
         viewModelScope.launch {
-            repository.observeProfile().collect { profile ->
+            observeProfile().collect { profile ->
                 hasProfile.value = profile != null
                 if (profile == null) {
                     clearForm()
@@ -193,7 +205,7 @@ class ProfileSetupViewModel @Inject constructor(
 
     fun onEquipmentSwiped(equipment: GymEquipment, available: Boolean) {
         viewModelScope.launch {
-            repository.setEquipmentStatus(
+            setEquipmentStatus(
                 id = equipment.id,
                 status = if (available) EquipmentStatus.Available else EquipmentStatus.Unavailable,
             )
@@ -202,7 +214,7 @@ class ProfileSetupViewModel @Inject constructor(
     }
 
     fun onResetEquipment() {
-        viewModelScope.launch { repository.resetEquipmentChoices() }
+        viewModelScope.launch { resetEquipmentChoices() }
         saved.value = false
     }
 
@@ -210,13 +222,13 @@ class ProfileSetupViewModel @Inject constructor(
         clearForm()
         hasProfile.value = false
         saved.value = false
-        viewModelScope.launch { repository.resetEquipmentChoices() }
+        viewModelScope.launch { resetEquipmentChoices() }
     }
 
     fun onDeleteProfile() {
         viewModelScope.launch {
-            repository.deleteProfile()
-            repository.resetEquipmentChoices()
+            deleteProfile()
+            resetEquipmentChoices()
             clearForm()
             hasProfile.value = false
             saved.value = false
@@ -249,7 +261,7 @@ class ProfileSetupViewModel @Inject constructor(
         )
         if (profile.name.isBlank()) return
         viewModelScope.launch {
-            repository.saveProfile(profile)
+            saveProfile(profile)
             hasProfile.value = true
             saved.value = true
         }

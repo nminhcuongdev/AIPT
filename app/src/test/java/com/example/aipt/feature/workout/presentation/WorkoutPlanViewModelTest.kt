@@ -2,15 +2,20 @@ package com.example.aipt.feature.workout.presentation
 
 import com.example.aipt.feature.exercise.domain.model.Exercise
 import com.example.aipt.feature.exercise.domain.repository.ExerciseRepository
+import com.example.aipt.feature.exercise.domain.usecase.ObserveExercisesUseCase
+import com.example.aipt.feature.exercise.domain.usecase.SeedExercisesUseCase
 import com.example.aipt.feature.profile.domain.model.BodyMetricSnapshot
 import com.example.aipt.feature.profile.domain.model.UserProfile
 import com.example.aipt.feature.profile.domain.repository.ProfileRepository
+import com.example.aipt.feature.profile.domain.usecase.ObserveEquipmentUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveProfileUseCase
 import com.example.aipt.feature.workout.domain.WorkoutPlanGenerator
 import com.example.aipt.feature.workout.domain.repository.WorkoutPlanSessionRepository
 import com.example.aipt.feature.workout.domain.repository.WorkoutRepository
 import com.example.aipt.feature.workout.domain.repository.WorkoutScheduleRepository
 import com.example.aipt.feature.workout.domain.usecase.CreateWorkoutPlanUseCase
 import com.example.aipt.feature.workout.domain.usecase.SaveWorkoutScheduleUseCase
+import com.example.aipt.feature.workout.domain.usecase.SetLatestWorkoutPlanUseCase
 import com.example.aipt.testutil.MainDispatcherRule
 import com.example.aipt.testutil.testEquipment
 import com.example.aipt.testutil.testUserProfile
@@ -144,12 +149,14 @@ class WorkoutPlanViewModelTest {
         coEvery { exerciseRepository.markViewed(any()) } returns Unit
 
         return WorkoutPlanViewModel(
-            profileRepository = profileRepository,
-            exerciseRepository = exerciseRepository,
+            observeProfile = ObserveProfileUseCase(profileRepository),
+            observeEquipment = ObserveEquipmentUseCase(profileRepository),
+            observeExercises = ObserveExercisesUseCase(exerciseRepository),
+            seedExercises = SeedExercisesUseCase(exerciseRepository),
             generator = generator,
             createWorkoutPlan = CreateWorkoutPlanUseCase(workoutRepository),
             saveWorkoutSchedule = SaveWorkoutScheduleUseCase(scheduleRepository),
-            planSessionRepository = sessionRepository,
+            setLatestWorkoutPlan = SetLatestWorkoutPlanUseCase(sessionRepository),
         )
     }
 

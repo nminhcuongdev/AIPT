@@ -1,9 +1,11 @@
-﻿package com.example.aipt.feature.exercise.presentation.detail
+package com.example.aipt.feature.exercise.presentation.detail
 
 import androidx.lifecycle.SavedStateHandle
 import com.example.aipt.feature.exercise.domain.model.Exercise
 import com.example.aipt.feature.exercise.domain.repository.ExerciseRepository
+import com.example.aipt.feature.exercise.domain.usecase.MarkExerciseViewedUseCase
 import com.example.aipt.feature.exercise.domain.usecase.ObserveExerciseDetailUseCase
+import com.example.aipt.feature.exercise.domain.usecase.SetExerciseFavoriteUseCase
 import com.example.aipt.testutil.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -34,7 +36,8 @@ class ExerciseDetailViewModelTest {
         ExerciseDetailViewModel(
             savedStateHandle = SavedStateHandle(mapOf("exerciseId" to 7)),
             observeExerciseDetail = ObserveExerciseDetailUseCase(repository),
-            repository = repository,
+            markExerciseViewed = MarkExerciseViewedUseCase(repository),
+            setExerciseFavorite = SetExerciseFavoriteUseCase(repository),
         )
         runCurrent()
 
@@ -48,7 +51,8 @@ class ExerciseDetailViewModelTest {
         val viewModel = ExerciseDetailViewModel(
             savedStateHandle = SavedStateHandle(mapOf("exerciseId" to 7)),
             observeExerciseDetail = ObserveExerciseDetailUseCase(repository),
-            repository = repository,
+            markExerciseViewed = MarkExerciseViewedUseCase(repository),
+            setExerciseFavorite = SetExerciseFavoriteUseCase(repository),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.exercise.collect {} }
         runCurrent()

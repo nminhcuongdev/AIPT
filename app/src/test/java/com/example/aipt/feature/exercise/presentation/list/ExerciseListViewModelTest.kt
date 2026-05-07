@@ -1,8 +1,10 @@
-﻿package com.example.aipt.feature.exercise.presentation.list
+package com.example.aipt.feature.exercise.presentation.list
 
 import com.example.aipt.feature.exercise.domain.model.Exercise
 import com.example.aipt.feature.exercise.domain.repository.ExerciseRepository
 import com.example.aipt.feature.exercise.domain.usecase.ObserveExercisesUseCase
+import com.example.aipt.feature.exercise.domain.usecase.SeedExercisesUseCase
+import com.example.aipt.feature.exercise.domain.usecase.SetExerciseFavoriteUseCase
 import com.example.aipt.testutil.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -33,7 +35,11 @@ class ExerciseListViewModelTest {
             ),
         )
         val repository = mockExerciseRepository(exercises)
-        val viewModel = ExerciseListViewModel(ObserveExercisesUseCase(repository), repository)
+        val viewModel = ExerciseListViewModel(
+            observeExercises = ObserveExercisesUseCase(repository),
+            seedExercises = SeedExercisesUseCase(repository),
+            setExerciseFavorite = SetExerciseFavoriteUseCase(repository),
+        )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
 
         runCurrent()
@@ -53,7 +59,11 @@ class ExerciseListViewModelTest {
             ),
         )
         val repository = mockExerciseRepository(exercises)
-        val viewModel = ExerciseListViewModel(ObserveExercisesUseCase(repository), repository)
+        val viewModel = ExerciseListViewModel(
+            observeExercises = ObserveExercisesUseCase(repository),
+            seedExercises = SeedExercisesUseCase(repository),
+            setExerciseFavorite = SetExerciseFavoriteUseCase(repository),
+        )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
         runCurrent()
 
@@ -74,7 +84,11 @@ class ExerciseListViewModelTest {
     fun `favorite click toggles repository and updates state`() = runTest {
         val exercises = MutableStateFlow(listOf(exercise(id = 1, name = "Bench Press", isFavorite = false)))
         val repository = mockExerciseRepository(exercises)
-        val viewModel = ExerciseListViewModel(ObserveExercisesUseCase(repository), repository)
+        val viewModel = ExerciseListViewModel(
+            observeExercises = ObserveExercisesUseCase(repository),
+            seedExercises = SeedExercisesUseCase(repository),
+            setExerciseFavorite = SetExerciseFavoriteUseCase(repository),
+        )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
         runCurrent()
 

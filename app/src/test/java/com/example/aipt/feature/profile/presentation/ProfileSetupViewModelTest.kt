@@ -5,6 +5,13 @@ import com.example.aipt.feature.profile.domain.model.EquipmentStatus
 import com.example.aipt.feature.profile.domain.model.GymEquipment
 import com.example.aipt.feature.profile.domain.model.UserProfile
 import com.example.aipt.feature.profile.domain.repository.ProfileRepository
+import com.example.aipt.feature.profile.domain.usecase.DeleteProfileUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveEquipmentUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveProfileUseCase
+import com.example.aipt.feature.profile.domain.usecase.ResetEquipmentChoicesUseCase
+import com.example.aipt.feature.profile.domain.usecase.SaveProfileUseCase
+import com.example.aipt.feature.profile.domain.usecase.SeedEquipmentUseCase
+import com.example.aipt.feature.profile.domain.usecase.SetEquipmentStatusUseCase
 import com.example.aipt.testutil.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -32,7 +39,7 @@ class ProfileSetupViewModelTest {
         val profile = MutableStateFlow<UserProfile?>(savedProfile())
         val equipment = MutableStateFlow(listOf(equipment(1, EquipmentStatus.Available), equipment(2, EquipmentStatus.Unknown)))
         val repository = mockProfileRepository(profile, equipment)
-        val viewModel = ProfileSetupViewModel(repository)
+        val viewModel = profileSetupViewModel(repository)
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
         runCurrent()
 
@@ -50,7 +57,7 @@ class ProfileSetupViewModelTest {
     @Test
     fun `sanitizes profile input and marks state unsaved`() = runTest {
         val repository = mockProfileRepository(MutableStateFlow(null), MutableStateFlow(emptyList()))
-        val viewModel = ProfileSetupViewModel(repository)
+        val viewModel = profileSetupViewModel(repository)
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
         runCurrent()
 
@@ -76,7 +83,7 @@ class ProfileSetupViewModelTest {
     fun `save profile trims name maps goal and coerces preferences`() = runTest {
         val profile = MutableStateFlow<UserProfile?>(null)
         val repository = mockProfileRepository(profile, MutableStateFlow(emptyList()))
-        val viewModel = ProfileSetupViewModel(repository)
+        val viewModel = profileSetupViewModel(repository)
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
         runCurrent()
 
@@ -107,7 +114,7 @@ class ProfileSetupViewModelTest {
     fun `equipment actions and delete profile call repository`() = runTest {
         val profile = MutableStateFlow<UserProfile?>(savedProfile())
         val repository = mockProfileRepository(profile, MutableStateFlow(listOf(equipment(3, EquipmentStatus.Unknown))))
-        val viewModel = ProfileSetupViewModel(repository)
+        val viewModel = profileSetupViewModel(repository)
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
         runCurrent()
 
@@ -123,6 +130,16 @@ class ProfileSetupViewModelTest {
         assertFalse(viewModel.uiState.value.saved)
     }
 
+
+    private fun profileSetupViewModel(repository: ProfileRepository): ProfileSetupViewModel = ProfileSetupViewModel(
+        observeProfile = ObserveProfileUseCase(repository),
+        observeEquipment = ObserveEquipmentUseCase(repository),
+        seedEquipment = SeedEquipmentUseCase(repository),
+        saveProfile = SaveProfileUseCase(repository),
+        deleteProfile = DeleteProfileUseCase(repository),
+        resetEquipmentChoices = ResetEquipmentChoicesUseCase(repository),
+        setEquipmentStatus = SetEquipmentStatusUseCase(repository),
+    )
     private fun mockProfileRepository(
         profile: MutableStateFlow<UserProfile?>,
         equipment: MutableStateFlow<List<GymEquipment>>,

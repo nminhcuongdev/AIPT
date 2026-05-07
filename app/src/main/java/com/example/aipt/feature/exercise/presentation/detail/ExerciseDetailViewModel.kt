@@ -4,8 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aipt.feature.exercise.domain.model.Exercise
-import com.example.aipt.feature.exercise.domain.repository.ExerciseRepository
+import com.example.aipt.feature.exercise.domain.usecase.MarkExerciseViewedUseCase
 import com.example.aipt.feature.exercise.domain.usecase.ObserveExerciseDetailUseCase
+import com.example.aipt.feature.exercise.domain.usecase.SetExerciseFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +20,8 @@ import javax.inject.Inject
 class ExerciseDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     observeExerciseDetail: ObserveExerciseDetailUseCase,
-    private val repository: ExerciseRepository,
+    private val markExerciseViewed: MarkExerciseViewedUseCase,
+    private val setExerciseFavorite: SetExerciseFavoriteUseCase,
 ) : ViewModel() {
     private val exerciseId: Int = checkNotNull(savedStateHandle["exerciseId"])
 
@@ -33,13 +35,13 @@ class ExerciseDetailViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             observeExerciseDetail(exerciseId).filterNotNull().first()
-            repository.markViewed(exerciseId)
+            markExerciseViewed(exerciseId)
         }
     }
 
     fun onFavoriteClicked(exercise: Exercise) {
         viewModelScope.launch {
-            repository.setFavorite(exercise.id, !exercise.isFavorite)
+            setExerciseFavorite(exercise.id, !exercise.isFavorite)
         }
     }
 }

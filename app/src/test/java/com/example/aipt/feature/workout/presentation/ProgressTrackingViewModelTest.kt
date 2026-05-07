@@ -2,9 +2,13 @@ package com.example.aipt.feature.workout.presentation
 
 import com.example.aipt.feature.exercise.domain.model.Exercise
 import com.example.aipt.feature.exercise.domain.repository.ExerciseRepository
+import com.example.aipt.feature.exercise.domain.usecase.SeedExercisesUseCase
 import com.example.aipt.feature.profile.domain.model.BodyMetricSnapshot
 import com.example.aipt.feature.profile.domain.model.UserProfile
 import com.example.aipt.feature.profile.domain.repository.ProfileRepository
+import com.example.aipt.feature.profile.domain.usecase.ObserveBodyMetricSnapshotsUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveEquipmentUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveProfileUseCase
 import com.example.aipt.feature.workout.domain.WorkoutPlanGenerator
 import com.example.aipt.feature.workout.domain.model.WorkoutDayProgressAnalysisResponse
 import com.example.aipt.feature.workout.domain.model.WorkoutProgressLog
@@ -14,8 +18,12 @@ import com.example.aipt.feature.workout.domain.repository.WorkoutRepository
 import com.example.aipt.feature.workout.domain.repository.WorkoutScheduleRepository
 import com.example.aipt.feature.workout.domain.usecase.AnalyzeWorkoutDayProgressUseCase
 import com.example.aipt.feature.workout.domain.usecase.CreateWorkoutPlanUseCase
+import com.example.aipt.feature.workout.domain.usecase.ObserveLatestWorkoutPlanUseCase
 import com.example.aipt.feature.workout.domain.usecase.ObserveWorkoutScheduleUseCase
 import com.example.aipt.feature.workout.domain.usecase.SaveWorkoutDayUseCase
+import com.example.aipt.feature.workout.domain.usecase.ObserveWorkoutProgressLogsUseCase
+import com.example.aipt.feature.workout.domain.usecase.SaveWorkoutProgressLogsUseCase
+import com.example.aipt.feature.workout.domain.usecase.SetLatestWorkoutPlanUseCase
 import com.example.aipt.testutil.MainDispatcherRule
 import com.example.aipt.testutil.testEquipment
 import com.example.aipt.testutil.testUserProfile
@@ -193,15 +201,19 @@ class ProgressTrackingViewModelTest {
         coEvery { exerciseRepository.markViewed(any()) } returns Unit
 
         return ProgressTrackingViewModel(
-            profileRepository = profileRepository,
-            exerciseRepository = exerciseRepository,
+            observeProfile = ObserveProfileUseCase(profileRepository),
+            observeEquipment = ObserveEquipmentUseCase(profileRepository),
+            observeBodyMetricSnapshots = ObserveBodyMetricSnapshotsUseCase(profileRepository),
+            seedExercises = SeedExercisesUseCase(exerciseRepository),
             generator = WorkoutPlanGenerator(),
             createWorkoutPlan = CreateWorkoutPlanUseCase(workoutRepository),
             analyzeWorkoutDayProgress = AnalyzeWorkoutDayProgressUseCase(workoutRepository),
             observeWorkoutSchedule = ObserveWorkoutScheduleUseCase(scheduleRepository),
             saveWorkoutDay = SaveWorkoutDayUseCase(scheduleRepository),
-            planSessionRepository = sessionRepository,
-            workoutProgressRepository = progressRepository,
+            observeWorkoutProgressLogs = ObserveWorkoutProgressLogsUseCase(progressRepository),
+            saveWorkoutProgressLogs = SaveWorkoutProgressLogsUseCase(progressRepository),
+            observeLatestWorkoutPlan = ObserveLatestWorkoutPlanUseCase(sessionRepository),
+            setLatestWorkoutPlan = SetLatestWorkoutPlanUseCase(sessionRepository),
         )
     }
 }

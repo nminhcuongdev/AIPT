@@ -3,8 +3,9 @@ package com.example.aipt.feature.exercise.presentation.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aipt.feature.exercise.domain.model.Exercise
-import com.example.aipt.feature.exercise.domain.repository.ExerciseRepository
 import com.example.aipt.feature.exercise.domain.usecase.ObserveExercisesUseCase
+import com.example.aipt.feature.exercise.domain.usecase.SeedExercisesUseCase
+import com.example.aipt.feature.exercise.domain.usecase.SetExerciseFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,7 +27,8 @@ data class ExerciseListUiState(
 @HiltViewModel
 class ExerciseListViewModel @Inject constructor(
     observeExercises: ObserveExercisesUseCase,
-    private val repository: ExerciseRepository,
+    private val seedExercises: SeedExercisesUseCase,
+    private val setExerciseFavorite: SetExerciseFavoriteUseCase,
 ) : ViewModel() {
     private val searchQuery = MutableStateFlow("")
     private val selectedMuscleGroup = MutableStateFlow("All")
@@ -63,7 +65,7 @@ class ExerciseListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            repository.seedIfNeeded()
+            seedExercises()
         }
     }
 
@@ -81,7 +83,7 @@ class ExerciseListViewModel @Inject constructor(
 
     fun onFavoriteClicked(exercise: Exercise) {
         viewModelScope.launch {
-            repository.setFavorite(exercise.id, !exercise.isFavorite)
+            setExerciseFavorite(exercise.id, !exercise.isFavorite)
         }
     }
 }

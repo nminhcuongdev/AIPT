@@ -1,10 +1,8 @@
-﻿package com.example.aipt.feature.workout.presentation
+package com.example.aipt.feature.workout.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.aipt.feature.exercise.domain.repository.ExerciseRepository
 import com.example.aipt.feature.profile.domain.model.BodyMetricSnapshot
-import com.example.aipt.feature.profile.domain.repository.ProfileRepository
 import com.example.aipt.feature.workout.domain.WorkoutPlanGenerator
 import com.example.aipt.feature.workout.domain.model.WorkoutDay
 import com.example.aipt.feature.workout.domain.model.WorkoutDayProgressAnalysisRequest
@@ -12,12 +10,18 @@ import com.example.aipt.feature.workout.domain.model.WorkoutDayProgressAnalysisR
 import com.example.aipt.feature.workout.domain.model.WorkoutPlan
 import com.example.aipt.feature.workout.domain.model.WorkoutProgressEntry
 import com.example.aipt.feature.workout.domain.model.WorkoutProgressLog
-import com.example.aipt.feature.workout.domain.repository.WorkoutPlanSessionRepository
-import com.example.aipt.feature.workout.domain.repository.WorkoutProgressRepository
+import com.example.aipt.feature.exercise.domain.usecase.SeedExercisesUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveBodyMetricSnapshotsUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveEquipmentUseCase
+import com.example.aipt.feature.profile.domain.usecase.ObserveProfileUseCase
 import com.example.aipt.feature.workout.domain.usecase.AnalyzeWorkoutDayProgressUseCase
 import com.example.aipt.feature.workout.domain.usecase.CreateWorkoutPlanUseCase
+import com.example.aipt.feature.workout.domain.usecase.ObserveLatestWorkoutPlanUseCase
 import com.example.aipt.feature.workout.domain.usecase.ObserveWorkoutScheduleUseCase
 import com.example.aipt.feature.workout.domain.usecase.SaveWorkoutDayUseCase
+import com.example.aipt.feature.workout.domain.usecase.ObserveWorkoutProgressLogsUseCase
+import com.example.aipt.feature.workout.domain.usecase.SaveWorkoutProgressLogsUseCase
+import com.example.aipt.feature.workout.domain.usecase.SetLatestWorkoutPlanUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -91,15 +95,19 @@ data class ProgressTrackingUiState(
 
 @HiltViewModel
 class ProgressTrackingViewModel @Inject constructor(
-    private val profileRepository: ProfileRepository,
-    private val exerciseRepository: ExerciseRepository,
+    private val observeProfile: ObserveProfileUseCase,
+    private val observeEquipment: ObserveEquipmentUseCase,
+    private val observeBodyMetricSnapshots: ObserveBodyMetricSnapshotsUseCase,
+    private val seedExercises: SeedExercisesUseCase,
     private val generator: WorkoutPlanGenerator,
     private val createWorkoutPlan: CreateWorkoutPlanUseCase,
     private val analyzeWorkoutDayProgress: AnalyzeWorkoutDayProgressUseCase,
     private val observeWorkoutSchedule: ObserveWorkoutScheduleUseCase,
     private val saveWorkoutDay: SaveWorkoutDayUseCase,
-    private val planSessionRepository: WorkoutPlanSessionRepository,
-    private val workoutProgressRepository: WorkoutProgressRepository,
+    private val observeWorkoutProgressLogs: ObserveWorkoutProgressLogsUseCase,
+    private val saveWorkoutProgressLogs: SaveWorkoutProgressLogsUseCase,
+    private val observeLatestWorkoutPlan: ObserveLatestWorkoutPlanUseCase,
+    private val setLatestWorkoutPlan: SetLatestWorkoutPlanUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProgressTrackingUiState(isLoading = true))
     val uiState: StateFlow<ProgressTrackingUiState> = _uiState.asStateFlow()
@@ -110,7 +118,7 @@ class ProgressTrackingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            planSessionRepository.latestPlan.collect { latestPlan ->
+            observeLatestWorkoutPlan().collect { latestPlan ->
                 if (latestPlan == null) {
                     ensurePlanLoaded()
                 } else {
@@ -131,8 +139,8 @@ class ProgressTrackingViewModel @Inject constructor(
         }
         viewModelScope.launch {
             combine(
-                workoutProgressRepository.observeLogs(),
-                profileRepository.observeBodyMetricSnapshots(),
+                observeWorkoutProgressLogs(),
+                observeBodyMetricSnapshots(),
             ) { logs, bodyMetrics -> logs to bodyMetrics }
                 .collect { (logs, bodyMetrics) ->
                     latestProgressLogs = logs
@@ -172,7 +180,7 @@ class ProgressTrackingViewModel @Inject constructor(
         dayJobs[day] = viewModelScope.launch {
             val performedAt = System.currentTimeMillis()
             updateDayStatus(day) { ProgressDayStatusUiState(isLoading = true) }
-            workoutProgressRepository.saveLogs(loggedEntries.map { it.toProgressLog(performedAt) })
+            saveWorkoutProgressLogs(loggedEntries.map { it.toProgressLog(performedAt) })
             val request = WorkoutDayProgressAnalysisRequest(
                 performedAt = performedAt,
                 day = day,
@@ -209,7 +217,7 @@ class ProgressTrackingViewModel @Inject constructor(
         if (planJob?.isActive == true) return
         planJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, isPlanMissing = false, errorMessage = null) }
-            exerciseRepository.seedIfNeeded()
+            seedExercises()
             val savedSchedule = observeWorkoutSchedule().first()
             if (savedSchedule.isNotEmpty()) {
                 _uiState.update {
@@ -222,16 +230,16 @@ class ProgressTrackingViewModel @Inject constructor(
                 }
                 return@launch
             }
-            val profile = profileRepository.observeProfile().first()
+            val profile = observeProfile().first()
             if (profile == null) {
                 _uiState.update { it.copy(isLoading = false, isPlanMissing = true) }
                 return@launch
             }
-            val equipment = profileRepository.observeEquipment().first()
+            val equipment = observeEquipment().first()
             val request = generator.buildRequest(profile, equipment)
             runCatching { createWorkoutPlan(request) }
                 .onSuccess { response ->
-                    planSessionRepository.setLatestPlan(response)
+                    setLatestWorkoutPlan.invoke(response)
                     _uiState.update {
                         it.copy(
                             schedule = response.plan.toProgressSchedule(),
@@ -414,4 +422,3 @@ private fun weekStartDateKey(timeMillis: Long): String {
 private fun String.shortDateLabel(): String = if (length >= 10) substring(5, 10).replace('-', '/') else this
 
 private val DateKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-
