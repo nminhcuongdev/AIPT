@@ -10,6 +10,7 @@ import com.example.aipt.feature.workout.domain.model.WorkoutDay
 import com.example.aipt.feature.workout.domain.model.WorkoutProgressLog
 import com.example.aipt.feature.workout.domain.usecase.ObserveWorkoutScheduleUseCase
 import com.example.aipt.feature.workout.domain.usecase.SaveWorkoutProgressLogsUseCase
+import com.example.aipt.feature.workout.domain.usecase.SelectWorkoutDayUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -65,6 +66,7 @@ class WorkoutSessionViewModel @Inject constructor(
     private val observeWorkoutSchedule: ObserveWorkoutScheduleUseCase,
     private val saveWorkoutSession: SaveWorkoutSessionUseCase,
     private val saveWorkoutProgressLogs: SaveWorkoutProgressLogsUseCase,
+    private val selectWorkoutDay: SelectWorkoutDayUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(WorkoutSessionUiState())
     val uiState: StateFlow<WorkoutSessionUiState> = _uiState.asStateFlow()
@@ -77,7 +79,7 @@ class WorkoutSessionViewModel @Inject constructor(
                 _uiState.value = WorkoutSessionUiState(isLoading = false, isPlanMissing = true)
                 return@launch
             }
-            val todayPlan = selectTodayPlan(days)
+            val todayPlan = selectWorkoutDay(days) ?: return@launch
             markStatus(todayPlan.day, WorkoutSessionStatus.InProgress)
             _uiState.value = WorkoutSessionUiState(
                 isLoading = false,
@@ -170,22 +172,6 @@ class WorkoutSessionViewModel @Inject constructor(
                 },
             )
         }
-    }
-
-    private fun selectTodayPlan(days: List<WorkoutDay>): WorkoutDay {
-        val sortedDays = days.sortedBy { it.day }
-        val mondayBasedDay = when (Calendar.getInstance().get(Calendar.DAY_OF_WEEK)) {
-            Calendar.MONDAY -> 1
-            Calendar.TUESDAY -> 2
-            Calendar.WEDNESDAY -> 3
-            Calendar.THURSDAY -> 4
-            Calendar.FRIDAY -> 5
-            Calendar.SATURDAY -> 6
-            else -> 7
-        }
-        val maxDay = sortedDays.maxOfOrNull { it.day } ?: 1
-        val targetDay = ((mondayBasedDay - 1) % maxDay) + 1
-        return sortedDays.firstOrNull { it.day == targetDay } ?: sortedDays.first()
     }
 
     private fun PlannedExercise.toUiState(day: Int, index: Int): WorkoutSessionExerciseUiState = WorkoutSessionExerciseUiState(

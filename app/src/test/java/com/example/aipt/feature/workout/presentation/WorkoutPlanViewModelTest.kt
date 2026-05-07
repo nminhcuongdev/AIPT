@@ -13,6 +13,7 @@ import com.example.aipt.feature.workout.domain.WorkoutPlanGenerator
 import com.example.aipt.feature.workout.domain.repository.WorkoutPlanSessionRepository
 import com.example.aipt.feature.workout.domain.repository.WorkoutRepository
 import com.example.aipt.feature.workout.domain.repository.WorkoutScheduleRepository
+import com.example.aipt.feature.workout.domain.usecase.BuildWorkoutPlanRequestUseCase
 import com.example.aipt.feature.workout.domain.usecase.CreateWorkoutPlanUseCase
 import com.example.aipt.feature.workout.domain.usecase.SaveWorkoutScheduleUseCase
 import com.example.aipt.feature.workout.domain.usecase.SetLatestWorkoutPlanUseCase
@@ -61,7 +62,7 @@ class WorkoutPlanViewModelTest {
         val generator = mockk<WorkoutPlanGenerator>()
         every { generator.buildRequest(any(), any()) } returns request
         val viewModel = createViewModel(
-            generator = generator,
+            buildWorkoutPlanRequest = BuildWorkoutPlanRequestUseCase(generator),
             workoutRepository = workoutRepository,
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
@@ -83,7 +84,7 @@ class WorkoutPlanViewModelTest {
         coEvery { workoutRepository.createWorkoutPlan(request) } throws IllegalStateException("api down") andThen response
         val generator = mockk<WorkoutPlanGenerator>()
         every { generator.buildRequest(any(), any()) } returns request
-        val viewModel = createViewModel(generator = generator, workoutRepository = workoutRepository)
+        val viewModel = createViewModel(buildWorkoutPlanRequest = BuildWorkoutPlanRequestUseCase(generator), workoutRepository = workoutRepository)
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
         runCurrent()
 
@@ -105,7 +106,7 @@ class WorkoutPlanViewModelTest {
         val generator = mockk<WorkoutPlanGenerator>()
         every { generator.buildRequest(any(), any()) } returns request
         val viewModel = createViewModel(
-            generator = generator,
+            buildWorkoutPlanRequest = BuildWorkoutPlanRequestUseCase(generator),
             workoutRepository = mockWorkoutRepository(response),
             scheduleRepository = scheduleRepository,
             sessionRepository = sessionRepository,
@@ -126,7 +127,7 @@ class WorkoutPlanViewModelTest {
 
     private fun createViewModel(
         profile: MutableStateFlow<UserProfile?> = MutableStateFlow(testUserProfile()),
-        generator: WorkoutPlanGenerator = WorkoutPlanGenerator(),
+        buildWorkoutPlanRequest: BuildWorkoutPlanRequestUseCase = BuildWorkoutPlanRequestUseCase(WorkoutPlanGenerator()),
         workoutRepository: WorkoutRepository = mockWorkoutRepository(testWorkoutPlanResponse()),
         scheduleRepository: WorkoutScheduleRepository = mockScheduleRepository(),
         sessionRepository: WorkoutPlanSessionRepository = WorkoutPlanSessionRepository(),
@@ -153,7 +154,7 @@ class WorkoutPlanViewModelTest {
             observeEquipment = ObserveEquipmentUseCase(profileRepository),
             observeExercises = ObserveExercisesUseCase(exerciseRepository),
             seedExercises = SeedExercisesUseCase(exerciseRepository),
-            generator = generator,
+            buildWorkoutPlanRequest = buildWorkoutPlanRequest,
             createWorkoutPlan = CreateWorkoutPlanUseCase(workoutRepository),
             saveWorkoutSchedule = SaveWorkoutScheduleUseCase(scheduleRepository),
             setLatestWorkoutPlan = SetLatestWorkoutPlanUseCase(sessionRepository),

@@ -17,6 +17,7 @@ import com.example.aipt.feature.workout.domain.repository.WorkoutProgressReposit
 import com.example.aipt.feature.workout.domain.repository.WorkoutRepository
 import com.example.aipt.feature.workout.domain.repository.WorkoutScheduleRepository
 import com.example.aipt.feature.workout.domain.usecase.AnalyzeWorkoutDayProgressUseCase
+import com.example.aipt.feature.workout.domain.usecase.BuildWorkoutPlanRequestUseCase
 import com.example.aipt.feature.workout.domain.usecase.CreateWorkoutPlanUseCase
 import com.example.aipt.feature.workout.domain.usecase.ObserveLatestWorkoutPlanUseCase
 import com.example.aipt.feature.workout.domain.usecase.ObserveWorkoutScheduleUseCase
@@ -205,7 +206,7 @@ class ProgressTrackingViewModelTest {
             observeEquipment = ObserveEquipmentUseCase(profileRepository),
             observeBodyMetricSnapshots = ObserveBodyMetricSnapshotsUseCase(profileRepository),
             seedExercises = SeedExercisesUseCase(exerciseRepository),
-            generator = WorkoutPlanGenerator(),
+            buildWorkoutPlanRequest = BuildWorkoutPlanRequestUseCase(WorkoutPlanGenerator()),
             createWorkoutPlan = CreateWorkoutPlanUseCase(workoutRepository),
             analyzeWorkoutDayProgress = AnalyzeWorkoutDayProgressUseCase(workoutRepository),
             observeWorkoutSchedule = ObserveWorkoutScheduleUseCase(scheduleRepository),

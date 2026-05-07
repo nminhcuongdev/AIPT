@@ -11,6 +11,7 @@ import com.example.aipt.feature.workout.domain.repository.WorkoutProgressReposit
 import com.example.aipt.feature.workout.domain.repository.WorkoutScheduleRepository
 import com.example.aipt.feature.workout.domain.usecase.ObserveWorkoutScheduleUseCase
 import com.example.aipt.feature.workout.domain.usecase.SaveWorkoutProgressLogsUseCase
+import com.example.aipt.feature.workout.domain.usecase.SelectWorkoutDayUseCase
 import com.example.aipt.testutil.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -158,6 +159,7 @@ class WorkoutSessionViewModelTest {
         observeWorkoutSchedule = ObserveWorkoutScheduleUseCase(scheduleRepository),
         saveWorkoutSession = SaveWorkoutSessionUseCase(sessionRepository),
         saveWorkoutProgressLogs = SaveWorkoutProgressLogsUseCase(progressRepository),
+        selectWorkoutDay = SelectWorkoutDayUseCase(),
     )
 
     private fun mockScheduleRepository(days: MutableStateFlow<List<WorkoutDay>>): WorkoutScheduleRepository {

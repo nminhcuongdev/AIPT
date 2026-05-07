@@ -9,6 +9,7 @@ import com.example.aipt.feature.exercise.domain.usecase.ObserveExercisesUseCase
 import com.example.aipt.feature.exercise.domain.usecase.SeedExercisesUseCase
 import com.example.aipt.feature.profile.domain.usecase.ObserveEquipmentUseCase
 import com.example.aipt.feature.profile.domain.usecase.ObserveProfileUseCase
+import com.example.aipt.feature.workout.domain.usecase.BuildWorkoutPlanRequestUseCase
 import com.example.aipt.feature.workout.domain.usecase.CreateWorkoutPlanUseCase
 import com.example.aipt.feature.workout.domain.usecase.SaveWorkoutScheduleUseCase
 import com.example.aipt.feature.workout.domain.usecase.SetLatestWorkoutPlanUseCase
@@ -43,7 +44,7 @@ class WorkoutPlanViewModel @Inject constructor(
     private val observeEquipment: ObserveEquipmentUseCase,
     private val observeExercises: ObserveExercisesUseCase,
     private val seedExercises: SeedExercisesUseCase,
-    private val generator: WorkoutPlanGenerator,
+    private val buildWorkoutPlanRequest: BuildWorkoutPlanRequestUseCase,
     private val createWorkoutPlan: CreateWorkoutPlanUseCase,
     private val saveWorkoutSchedule: SaveWorkoutScheduleUseCase,
     private val setLatestWorkoutPlan: SetLatestWorkoutPlanUseCase,
@@ -65,7 +66,7 @@ class WorkoutPlanViewModel @Inject constructor(
                 observeEquipment(),
                 observeExercises(),
             ) { profile, equipment, _ ->
-                if (profile == null) null else generator.buildRequest(profile, equipment)
+                if (profile == null) null else buildWorkoutPlanRequest(profile, equipment)
             }.collect { request ->
                 if (request == null) {
                     requestJob?.cancel()

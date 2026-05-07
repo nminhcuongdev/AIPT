@@ -15,6 +15,7 @@ import com.example.aipt.feature.profile.domain.usecase.ObserveBodyMetricSnapshot
 import com.example.aipt.feature.profile.domain.usecase.ObserveEquipmentUseCase
 import com.example.aipt.feature.profile.domain.usecase.ObserveProfileUseCase
 import com.example.aipt.feature.workout.domain.usecase.AnalyzeWorkoutDayProgressUseCase
+import com.example.aipt.feature.workout.domain.usecase.BuildWorkoutPlanRequestUseCase
 import com.example.aipt.feature.workout.domain.usecase.CreateWorkoutPlanUseCase
 import com.example.aipt.feature.workout.domain.usecase.ObserveLatestWorkoutPlanUseCase
 import com.example.aipt.feature.workout.domain.usecase.ObserveWorkoutScheduleUseCase
@@ -99,7 +100,7 @@ class ProgressTrackingViewModel @Inject constructor(
     private val observeEquipment: ObserveEquipmentUseCase,
     private val observeBodyMetricSnapshots: ObserveBodyMetricSnapshotsUseCase,
     private val seedExercises: SeedExercisesUseCase,
-    private val generator: WorkoutPlanGenerator,
+    private val buildWorkoutPlanRequest: BuildWorkoutPlanRequestUseCase,
     private val createWorkoutPlan: CreateWorkoutPlanUseCase,
     private val analyzeWorkoutDayProgress: AnalyzeWorkoutDayProgressUseCase,
     private val observeWorkoutSchedule: ObserveWorkoutScheduleUseCase,
@@ -236,7 +237,7 @@ class ProgressTrackingViewModel @Inject constructor(
                 return@launch
             }
             val equipment = observeEquipment().first()
-            val request = generator.buildRequest(profile, equipment)
+            val request = buildWorkoutPlanRequest(profile, equipment)
             runCatching { createWorkoutPlan(request) }
                 .onSuccess { response ->
                     setLatestWorkoutPlan.invoke(response)
