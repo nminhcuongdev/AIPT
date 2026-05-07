@@ -1,4 +1,4 @@
-# AIPT
+﻿# AIPT
 
 AIPT is an Android AI personal trainer app built with Kotlin and Jetpack Compose. It helps users create a profile, generate workout plans, run guided workout sessions, track progress, and chat with an AI trainer.
 
@@ -55,6 +55,7 @@ The app currently points Retrofit to:
 ```kotlin
 https://github.com/nminhcuongdev/workoutplannerAPI
 ```
+Pull this repository and set up in your local machine.
 
 Configured endpoints:
 
