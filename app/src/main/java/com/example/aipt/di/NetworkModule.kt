@@ -1,5 +1,6 @@
 package com.example.aipt.di
 
+import com.example.aipt.BuildConfig
 import com.example.aipt.core.network.ApiService
 import com.example.aipt.feature.chat.data.remote.AiTrainerChatApi
 import com.example.aipt.feature.workout.data.remote.WorkoutPlanApi
@@ -28,7 +29,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
-        .baseUrl("http://10.84.30.20:8000/")
+        .baseUrl(BuildConfig.API_BASE_URL.withTrailingSlash())
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
@@ -47,4 +48,6 @@ object NetworkModule {
     @Singleton
     fun provideAiTrainerChatApi(retrofit: Retrofit): AiTrainerChatApi =
         retrofit.create(AiTrainerChatApi::class.java)
+
+    private fun String.withTrailingSlash(): String = if (endsWith('/')) this else "$this/"
 }

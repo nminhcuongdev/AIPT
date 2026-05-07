@@ -1,4 +1,4 @@
-﻿# AIPT
+# AIPT
 
 AIPT is an Android AI personal trainer app built with Kotlin and Jetpack Compose. It helps users create a profile, generate workout plans, run guided workout sessions, track progress, and chat with an AI trainer.
 
@@ -50,12 +50,25 @@ AIPT is an Android AI personal trainer app built with Kotlin and Jetpack Compose
 
 ## Backend API
 
-The app currently points Retrofit to:
+The Android app reads the API URL from `BuildConfig.API_BASE_URL`, generated from the Gradle property `AIPT_API_BASE_URL`.
 
-```kotlin
+Default local emulator value:
+
+```text
+http://10.0.2.2:8000/
+```
+
+Run with a custom backend URL:
+
+```powershell
+.\gradlew.bat assembleDebug -PAIPT_API_BASE_URL=http://YOUR_HOST:8000/
+```
+
+Backend repository:
+
+```text
 https://github.com/nminhcuongdev/workoutplannerAPI
 ```
-Pull this repository and set up in your local machine.
 
 Configured endpoints:
 
@@ -65,10 +78,10 @@ Configured endpoints:
 - `POST /api/v1/workout-progress/analyze`
 - `POST /api/v1/workout-advice`
 
-To change the backend address, update `NetworkModule`:
+To change the backend address, pass `AIPT_API_BASE_URL` when building or define it as a Gradle property:
 
 ```text
-app/src/main/java/com/example/aipt/di/NetworkModule.kt
+AIPT_API_BASE_URL=http://YOUR_HOST:8000/
 ```
 
 The manifest enables internet access and cleartext traffic for local development.

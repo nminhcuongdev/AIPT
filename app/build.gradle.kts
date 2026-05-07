@@ -5,6 +5,10 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+val apiBaseUrl = providers.gradleProperty("AIPT_API_BASE_URL")
+    .orElse("http://10.0.2.2:8000/")
+    .get()
+
 android {
     namespace = "com.example.aipt"
     compileSdk {
@@ -21,6 +25,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
 
     buildTypes {
@@ -43,6 +48,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -88,4 +94,3 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
-

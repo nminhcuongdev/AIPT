@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.aipt.BuildConfig
 import com.example.aipt.core.ui.components.AiptHeroHeader
 import com.example.aipt.core.ui.components.AiptMetricRow
 import com.example.aipt.core.ui.components.AiptPanel
@@ -151,7 +152,7 @@ private fun LoadingState() {
             CircularProgressIndicator()
             Column {
                 Text("Creating workout plan", style = MaterialTheme.typography.titleLarge, color = Ink900)
-                Text("Calling http://10.84.30.20:8000/api/v1/workout-plans", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Calling ${BuildConfig.API_BASE_URL.withTrailingSlash()}api/v1/workout-plans", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -240,6 +241,8 @@ private fun GuidancePanel(title: String, items: List<String>, accent: Color = In
     }
 }
 
+private fun String.withTrailingSlash(): String = if (endsWith('/')) this else "$this/"
+
 @Composable
 private fun BulletList(items: List<String>) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -248,7 +251,3 @@ private fun BulletList(items: List<String>) {
         }
     }
 }
-
-
-
-
