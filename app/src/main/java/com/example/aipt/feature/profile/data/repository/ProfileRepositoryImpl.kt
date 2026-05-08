@@ -1,4 +1,4 @@
-﻿package com.example.aipt.feature.profile.data.repository
+package com.example.aipt.feature.profile.data.repository
 
 import com.example.aipt.feature.profile.data.local.BodyMetricSnapshotDao
 import com.example.aipt.feature.profile.data.local.GymEquipmentDao
@@ -33,10 +33,13 @@ class ProfileRepositoryImpl @Inject constructor(
         bodyMetricSnapshotDao.observeSnapshots().map { snapshots -> snapshots.map { it.toDomain() } }
 
     override suspend fun seedEquipmentIfNeeded() {
-        if (gymEquipmentDao.count() == 0) {
-            gymEquipmentDao.insertAll(GymEquipmentSeedData.equipment)
-        } else {
-            gymEquipmentDao.upsertAll(GymEquipmentSeedData.equipment)
+        gymEquipmentDao.insertAll(GymEquipmentSeedData.equipment)
+        GymEquipmentSeedData.equipment.forEach { equipment ->
+            gymEquipmentDao.updateSeedMetadata(
+                id = equipment.id,
+                name = equipment.name,
+                imageUrl = equipment.imageUrl,
+            )
         }
     }
 

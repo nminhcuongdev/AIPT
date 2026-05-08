@@ -23,6 +23,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,9 +39,11 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.example.aipt.core.ui.components.AiptPanel
 import com.example.aipt.core.ui.components.AiptPill
 import com.example.aipt.feature.profile.domain.model.GymEquipment
@@ -78,6 +81,15 @@ internal fun EquipmentSwipeSection(
 private fun SwipeEquipmentCard(equipment: GymEquipment, onSwipe: (Boolean) -> Unit) {
     var offsetX by remember(equipment.id) { mutableFloatStateOf(0f) }
     val threshold = 160f
+    val context = LocalContext.current
+    val imageRequest = remember(context, equipment.id, equipment.imageUrl) {
+        ImageRequest.Builder(context)
+            .data(equipment.imageUrl)
+            .crossfade(true)
+            .memoryCacheKey("${equipment.id}:${equipment.imageUrl}")
+            .diskCacheKey(equipment.imageUrl)
+            .build()
+    }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Card(
@@ -104,14 +116,16 @@ private fun SwipeEquipmentCard(equipment: GymEquipment, onSwipe: (Boolean) -> Un
             elevation = CardDefaults.cardElevation(defaultElevation = 14.dp),
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                SubcomposeAsyncImage(
-                    model = equipment.imageUrl,
-                    contentDescription = equipment.name,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                    loading = { EquipmentImagePlaceholder(equipment.name) },
-                    error = { EquipmentImagePlaceholder(equipment.name) },
-                )
+                key(equipment.id, equipment.imageUrl) {
+                    SubcomposeAsyncImage(
+                        model = imageRequest,
+                        contentDescription = equipment.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        loading = { EquipmentImagePlaceholder(equipment.name) },
+                        error = { EquipmentImagePlaceholder(equipment.name) },
+                    )
+                }
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
