@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 enum class StartupDestination {
@@ -28,8 +29,12 @@ enum class StartupDestination {
 
 @HiltViewModel
 class StartupViewModel @Inject constructor(
-    profileRepository: ProfileRepository,
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
+    init {
+        viewModelScope.launch { profileRepository.seedEquipmentIfNeeded() }
+    }
+
     val destination: StateFlow<StartupDestination> = profileRepository.observeProfile()
         .map { profile ->
             if (profile == null) StartupDestination.ProfileFlow else StartupDestination.TodayDashboard

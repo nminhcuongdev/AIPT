@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -58,6 +59,7 @@ import kotlin.math.roundToInt
 internal fun EquipmentSwipeSection(
     state: ProfileSetupUiState,
     onEquipmentSwiped: (GymEquipment, Boolean) -> Unit,
+    onResetEquipment: () -> Unit,
 ) {
     val currentEquipment = state.currentEquipment
     if (currentEquipment == null) {
@@ -65,9 +67,13 @@ internal fun EquipmentSwipeSection(
             Text("Inventory complete", style = MaterialTheme.typography.titleLarge, color = Ink900)
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "Tap Finish to save your profile and create your workout plan.",
+                text = "Tap Finish to keep your equipment choices, or choose again to swipe your inventory from the start.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            Spacer(Modifier.height(16.dp))
+            Button(onClick = onResetEquipment, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                Text("Choose equipment again")
+            }
         }
     } else {
         SwipeEquipmentCard(
@@ -87,7 +93,7 @@ private fun SwipeEquipmentCard(equipment: GymEquipment, onSwipe: (Boolean) -> Un
             .data(equipment.imageUrl)
             .crossfade(true)
             .memoryCacheKey("${equipment.id}:${equipment.imageUrl}")
-            .diskCacheKey(equipment.imageUrl)
+            .diskCacheKey("${equipment.id}:${equipment.imageUrl}")
             .build()
     }
 
@@ -122,7 +128,7 @@ private fun SwipeEquipmentCard(equipment: GymEquipment, onSwipe: (Boolean) -> Un
                         contentDescription = equipment.name,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
-                        loading = { EquipmentImagePlaceholder(equipment.name) },
+                        loading = { EquipmentImageLoading() },
                         error = { EquipmentImagePlaceholder(equipment.name) },
                     )
                 }
@@ -152,6 +158,17 @@ private fun SwipeEquipmentCard(equipment: GymEquipment, onSwipe: (Boolean) -> Un
 }
 
 @Composable
+private fun EquipmentImageLoading() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Brush.linearGradient(listOf(Ink900, Color(0xFF24313A)))),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(color = Volt)
+    }
+}
+@Composable
 private fun EquipmentImagePlaceholder(name: String) {
     Box(
         modifier = Modifier
@@ -170,7 +187,7 @@ private fun EquipmentImagePlaceholder(name: String) {
                 .align(Alignment.BottomStart)
                 .padding(24.dp),
         ) {
-            AiptPill("Generated visual", containerColor = Volt, contentColor = Ink900)
+            AiptPill("Image unavailable", containerColor = Volt, contentColor = Ink900)
             Spacer(Modifier.height(10.dp))
             Text(name, style = MaterialTheme.typography.headlineMedium, color = Bone)
         }

@@ -33,14 +33,7 @@ class ProfileRepositoryImpl @Inject constructor(
         bodyMetricSnapshotDao.observeSnapshots().map { snapshots -> snapshots.map { it.toDomain() } }
 
     override suspend fun seedEquipmentIfNeeded() {
-        gymEquipmentDao.insertAll(GymEquipmentSeedData.equipment)
-        GymEquipmentSeedData.equipment.forEach { equipment ->
-            gymEquipmentDao.updateSeedMetadata(
-                id = equipment.id,
-                name = equipment.name,
-                imageUrl = equipment.imageUrl,
-            )
-        }
+        gymEquipmentDao.seedEquipment(GymEquipmentSeedData.equipment)
     }
 
     override suspend fun saveProfile(profile: UserProfile) {

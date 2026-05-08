@@ -50,7 +50,7 @@ internal fun GymEquipmentScreen(
                     ),
                 )
                 Spacer(Modifier.height(18.dp))
-                EquipmentSwipeSection(state, onEquipmentSwiped)
+                EquipmentSwipeSection(state, onEquipmentSwiped, onResetEquipment)
                 Spacer(Modifier.height(18.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f).height(54.dp)) { Text("Back") }
