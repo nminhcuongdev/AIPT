@@ -6,11 +6,11 @@ plugins {
 }
 
 val apiBaseUrl = providers.gradleProperty("AIPT_API_BASE_URL")
-    .orElse("http://10.0.2.2:8000/")
+    .orElse("http://10.84.30.20:8000/")
     .get()
 
 android {
-    namespace = "com.example.aipt"
+    namespace = "nminhcuong.aipt"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -18,7 +18,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.aipt"
+        applicationId = "nminhcuong.aipt"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

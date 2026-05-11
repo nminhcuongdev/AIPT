@@ -38,6 +38,17 @@ AIPT is an Android AI personal trainer app built with Kotlin and Jetpack Compose
 - Coil
 - Vico dependencies are included for charting support
 
+## Architecture
+
+AIPT follows a feature-based MVVM structure with a lightweight domain layer:
+
+- Presentation: Jetpack Compose screens and ViewModels expose immutable UI state for each feature.
+- Domain: Use cases coordinate profile, workout, dashboard, exercise, and chat workflows.
+- Data: Repository implementations connect Room DAOs, seed data, and Retrofit API services.
+- Dependency injection: Hilt modules provide database, network, repository, and use case dependencies.
+- Navigation: A central Navigation Compose graph connects onboarding, dashboard, workout, progress, exercise, and chat screens.
+- Testing: ViewModel unit tests use coroutine test utilities and mocked repositories/use cases.
+
 ## Requirements
 
 - Android Studio with Android Gradle Plugin support
@@ -55,7 +66,7 @@ The Android app reads the API URL from `BuildConfig.API_BASE_URL`, generated fro
 Default local emulator value:
 
 ```text
-http://10.0.2.2:8000/
+http://10.84.30.20:8000/
 ```
 
 Run with a custom backend URL:
@@ -129,7 +140,7 @@ Open in Android Studio:
 ## Project Structure
 
 ```text
-app/src/main/java/com/example/aipt
+app/src/main/java/nminhcuong/aipt
 |-- core
 |   |-- data/local
 |   |-- navigation

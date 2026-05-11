@@ -1,0 +1,25 @@
+package nminhcuong.aipt.feature.profile.domain.model
+
+data class UserProfile(
+    val name: String,
+    val age: Int?,
+    val heightCm: Int?,
+    val weightKg: Int?,
+    val bodyFatPercent: Double?,
+    val skeletalMuscleMassKg: Double?,
+    val bodyWaterLiters: Double?,
+    val visceralFatLevel: Int?,
+    val basalMetabolicRateKcal: Int?,
+    val waistHipRatio: Double?,
+    val leftArmMuscleKg: Double?,
+    val rightArmMuscleKg: Double?,
+    val trunkMuscleKg: Double?,
+    val leftLegMuscleKg: Double?,
+    val rightLegMuscleKg: Double?,
+    val trainingGoal: String,
+    val daysPerWeek: Int?,
+    val sessionDurationMinutes: Int?,
+    val experienceLevel: String,
+    val injuriesOrLimitations: String,
+    val preferredLanguage: String,
+)
