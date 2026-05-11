@@ -107,6 +107,18 @@ Run tests:
 .\gradlew.bat test
 ```
 
+## GitHub Actions
+
+The repository includes an Android APK workflow at `.github/workflows/android-apk.yml`.
+
+The workflow runs on pull requests, pushes to `main` or `master`, manual dispatches, and version tags matching `v*`. It:
+
+- Installs JDK 17 and the Android SDK packages required by the project.
+- Runs unit tests with `./gradlew testDebugUnitTest`.
+- Builds the release APK with `./gradlew assembleRelease`.
+- Uploads the APK from `app/build/outputs/apk/release/` as a workflow artifact.
+- Creates a GitHub Release and attaches the APK when a tag such as `v1.0.0` is pushed.
+
 Open in Android Studio:
 
 1. Open the `AIPT` folder.
